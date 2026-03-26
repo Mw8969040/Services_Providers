@@ -1,6 +1,6 @@
 @using X.PagedList
 @using X.PagedList.Mvc.Core
-@model IPagedList<SmartPlatform.Domain.Entities.ApplicationUser>
+@model IPagedList<SmartPlatform.Application.DTOs.UserVM>
 @{
     ViewData["Title"] = "User Management";
 }
@@ -27,7 +27,8 @@
                 <tbody>
                     @foreach (var user in Model)
                     {
-                        var roles = await UserManager.GetRolesAsync(user);
+                        var identityUser = await UserManager.FindByIdAsync(user.Id);
+                        var roles = identityUser != null ? await UserManager.GetRolesAsync(identityUser) : new List<string>();
                         <tr id="user-@user.Id">
                             <td>
                                 <strong>@user.FullName</strong>
