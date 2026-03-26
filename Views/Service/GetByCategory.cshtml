@@ -1,0 +1,43 @@
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+@model IPagedList<ServiceVM>
+@{
+    ViewData["Title"] = "Services";
+}
+
+<div class="container py-4">
+    <div class="sp-page-header">
+        <h2><i class="fas fa-briefcase"></i> Services</h2>
+        <a asp-controller="Category" asp-action="Index" class="btn btn-sp-outline">
+            <i class="fas fa-arrow-left"></i> Back to Categories
+        </a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var service in Model)
+            {
+                <div class="col-md-4 col-sm-6">
+                    <partial name="_ServiceCard" model="service" />
+                </div>
+            }
+        </div>
+
+        <div class="mt-4 d-flex justify-content-center">
+            @Html.PagedListPager(Model, page => Url.Action("GetByCategory", new { categoryId = ViewBag.CategoryId, page }), new PagedListRenderOptions {
+                LiElementClasses = new string[] { "page-item" },
+                PageClasses = new string[] { "page-link" },
+                UlElementClasses = new string[] { "pagination justify-content-center" }
+            })
+        </div>
+    }
+    else
+    {
+        <div class="sp-empty-state">
+            <i class="fas fa-box-open d-block"></i>
+            <h4>No services in this category</h4>
+            <p>Check back later for new services.</p>
+        </div>
+    }
+</div>

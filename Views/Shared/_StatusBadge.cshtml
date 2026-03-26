@@ -1,0 +1,22 @@
+@* --- Partial View: Status Badge --- *@
+@* بيعرض الـ Status كـ Badge بلون مختلف *@
+@model Smart_Platform.Models.RequestStatus
+
+@switch (Model)
+{
+    case Smart_Platform.Models.RequestStatus.Pending:
+        <span class="sp-badge sp-badge-pending"><i class="fas fa-clock"></i> Pending</span>
+        break;
+    case Smart_Platform.Models.RequestStatus.Accepted:
+        <span class="sp-badge sp-badge-accepted"><i class="fas fa-check"></i> Accepted</span>
+        break;
+    case Smart_Platform.Models.RequestStatus.Completed:
+        <span class="sp-badge sp-badge-completed"><i class="fas fa-check-double"></i> Completed</span>
+        break;
+    case Smart_Platform.Models.RequestStatus.Rejected:
+        <span class="sp-badge sp-badge-rejected"><i class="fas fa-times"></i> Rejected</span>
+        break;
+    case Smart_Platform.Models.RequestStatus.Cancelled:
+        <span class="sp-badge sp-badge-cancelled"><i class="fas fa-ban"></i> Cancelled</span>
+        break;
+}

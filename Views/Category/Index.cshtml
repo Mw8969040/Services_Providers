@@ -1,0 +1,86 @@
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+@model IPagedList<CategoryVM>
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<div class="container py-4">
+    <div class="sp-page-header">
+        <h2><i class="fas fa-th-large"></i> Categories</h2>
+        @if (User.IsInRole("Admin"))
+        {
+            <button class="btn btn-sp-primary" onclick="openModal('@Url.Action("Create", "Category")', 'Add New Category')">
+                <i class="fas fa-plus"></i> Add Category
+            </button>
+        }
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4" id="categoriesContainer">
+            @foreach (var category in Model)
+            {
+                <div class="col-md-4 col-sm-6" id="category-@category.Id">
+                    <div class="sp-card">
+                        @if (!string.IsNullOrEmpty(category.ImageUrl))
+                        {
+                            <img src="@category.ImageUrl" class="card-img-top" alt="@category.Name" />
+                        }
+                        else
+                        {
+                            <div class="sp-card-img-placeholder">
+                                <i class="fas fa-th-large"></i>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@category.Name</h5>
+                            @if (!string.IsNullOrEmpty(category.Description))
+                            {
+                                <p class="card-text">@category.Description</p>
+                            }
+                            <span class="text-muted" style="font-size:0.85rem;">
+                                <i class="fas fa-briefcase"></i> @category.ServicesCount Services
+                            </span>
+
+                            <div class="mt-3 d-flex gap-2">
+                                <a asp-controller="Service" asp-action="GetByCategory" asp-route-categoryId="@category.Id"
+                                   class="btn btn-sp-primary btn-sp-sm flex-grow-1">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <button class="btn btn-sp-warning btn-sp-sm"
+                                            onclick="openModal('@Url.Action("Edit", "Category", new { Id = category.Id })', 'Edit Category')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sp-danger btn-sp-sm"
+                                            onclick="confirmDelete('@Url.Action("Delete", "Category")', { Id: @category.Id }, function() { $('#category-@category.Id').fadeOut(); })">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4 d-flex justify-content-center">
+            @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions {
+                LiElementClasses = new string[] { "page-item" },
+                PageClasses = new string[] { "page-link" },
+                UlElementClasses = new string[] { "pagination justify-content-center" }
+            })
+        </div>
+    }
+    else
+    {
+        <div class="sp-empty-state">
+            <i class="fas fa-th-large d-block"></i>
+            <h4>No categories yet</h4>
+            <p>Categories will appear here once they are added.</p>
+        </div>
+    }
+</div>

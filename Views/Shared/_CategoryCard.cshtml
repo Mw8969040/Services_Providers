@@ -1,0 +1,29 @@
+@* --- Partial View: Category Card --- *@
+@* بيعرض قسم واحد كـ Card *@
+@model CategoryVM
+
+<a asp-controller="Service" asp-action="GetByCategory" asp-route-categoryId="@Model.Id"
+   class="text-decoration-none">
+    <div class="sp-card">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Name" />
+        }
+        else
+        {
+            <div class="sp-card-img-placeholder">
+                <i class="fas fa-th-large"></i>
+            </div>
+        }
+        <div class="card-body">
+            <h5 class="card-title">@Model.Name</h5>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="card-text">@Model.Description</p>
+            }
+            <span class="text-muted" style="font-size:0.85rem;">
+                <i class="fas fa-briefcase"></i> @Model.ServicesCount Services
+            </span>
+        </div>
+    </div>
+</a>

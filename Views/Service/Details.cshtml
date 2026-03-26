@@ -1,0 +1,144 @@
+@* --- Service/Details — View service details (Customer) --- *@
+@model ServiceVM
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container py-4">
+    <div class="sp-details">
+        <div class="row">
+            <!-- Image -->
+            <div class="col-lg-5">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="@Model.Title" class="w-100" style="border-radius:12px; max-height:400px; object-fit:cover;" />
+                }
+                else
+                {
+                    <div class="sp-card-img-placeholder" style="height:300px; border-radius:12px;">
+                        <i class="fas fa-briefcase fa-4x"></i>
+                    </div>
+                }
+            </div>
+
+            <!-- Info -->
+            <div class="col-lg-7">
+                <div class="sp-details-info">
+                    <h2>@Model.Title</h2>
+
+                    <div class="sp-details-meta">
+                        <span><i class="fas fa-tag"></i> @Model.CategoryName</span>
+                        <span><i class="fas fa-user"></i> @Model.ProviderName</span>
+                        @if (Model.IsAvailable)
+                        {
+                            <span class="sp-available"><i class="fas fa-check-circle"></i> Available</span>
+                        }
+                        else
+                        {
+                            <span class="sp-unavailable"><i class="fas fa-times-circle"></i> Unavailable</span>
+                        }
+                    </div>
+
+                    <div class="mb-4">
+                        <span class="sp-price" style="font-size:2rem;">@Model.BasePrice.ToString("C")</span>
+                    </div>
+
+                    <h5 class="fw-bold mb-2">Description</h5>
+                    <p style="line-height:1.8; color: var(--text-secondary);">@Model.Description</p>
+
+                    <!-- Request Service Button (Customer only) -->
+                    @if (User.IsInRole("Customer") && Model.IsAvailable)
+                    {
+                        <form asp-controller="ServiceRequest" asp-action="Create" asp-route-serviceId="@Model.Id"
+                              method="post" class="mt-4">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sp-primary btn-lg" @(Model.HasPendingRequest ? "disabled" : "")>
+                                <i class="fas @(Model.HasPendingRequest ? "fa-clock" : "fa-shopping-cart")"></i> 
+                                @(Model.HasPendingRequest ? "Request Pending..." : "Request This Service")
+                            </button>
+                        </form>
+                    }
+
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <div class="mt-4">
+                            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-sp-outline btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Login to Request
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-4">
+        <a href="javascript:history.back()" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <hr class="my-5" />
+
+    <!-- Reviews Section -->
+    <div class="reviews-section">
+        <h3 class="mb-4"><i class="fas fa-star text-warning"></i> Reviews (@Model.Reviews.Count())</h3>
+
+        @if (Model.Reviews != null && Model.Reviews.Any())
+        {
+            <div class="row g-4">
+                @foreach (var review in Model.Reviews)
+                {
+                    <div class="col-md-6">
+                        <div class="review-card p-3 border rounded h-100 bg-light">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">@review.CustomerName</h6>
+                                    <div class="text-warning small">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fas fa-star @(i <= review.Rating ? "" : "text-muted")"></i>
+                                        }
+                                    </div>
+                                </div>
+                                @using System.Security.Claims
+                                @if (User.Identity.IsAuthenticated && review.CustomerId == User.FindFirstValue(ClaimTypes.NameIdentifier))
+                                {
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <button class="dropdown-item" onclick="openModal('@Url.Action("Edit", "Review", new { id = review.Id })', 'Edit Review')">
+                                                    <i class="fas fa-edit me-2"></i> Edit
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <form asp-controller="Review" asp-action="Delete" asp-route-id="@review.Id" method="post" onsubmit="return confirm('Are you sure?')">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="fas fa-trash me-2"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                }
+                            </div>
+                            <p class="mb-0 text-muted fst-italic">"@review.Comment"</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 bg-light rounded border border-dashed">
+                <i class="far fa-comment-dots fa-3x text-muted mb-3"></i>
+                <p class="text-muted mb-0">No reviews yet for this service.</p>
+            </div>
+        }
+    </div>
+</div>

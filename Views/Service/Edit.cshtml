@@ -1,0 +1,95 @@
+@* --- Service/Edit — Edit existing service --- *@
+@model ServiceVM
+@{
+    ViewData["Title"] = "Edit Service";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="sp-details">
+                <h2 class="mb-4"><i class="fas fa-edit"></i> Edit Service</h2>
+
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="ImageUrl" />
+                    <input type="hidden" name="CategoryId" value="@Model.CategoryId" />
+
+                    <!-- Title -->
+                    <div class="sp-form-group">
+                        <label asp-for="Title"></label>
+                        <input asp-for="Title" class="form-control sp-form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="sp-form-group">
+                        <label asp-for="Description"></label>
+                        <textarea asp-for="Description" class="form-control sp-form-control" rows="4"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <!-- Price & Availability -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="sp-form-group">
+                                <label asp-for="BasePrice"></label>
+                                <input asp-for="BasePrice" class="form-control sp-form-control" type="number" step="0.01" />
+                                <span asp-validation-for="BasePrice" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="sp-form-group">
+                                <label asp-for="IsAvailable"></label>
+                                <div class="form-check mt-2">
+                                    <input asp-for="IsAvailable" class="form-check-input" type="checkbox" />
+                                    <label class="form-check-label">Available for requests</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="sp-form-group">
+                        <label asp-for="CategoryId"></label>
+                        <select asp-for="CategoryId" asp-items="@ViewBag.categories" class="form-select sp-form-control">
+                            <option value="">-- Select Category --</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="sp-form-group">
+                        <label asp-for="ImageFile"></label>
+                        <input asp-for="ImageFile" class="form-control sp-form-control" type="file" accept="image/*" id="ImageFile" />
+
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <img src="@Model.ImageUrl" class="sp-img-preview" id="imagePreview" />
+                        }
+                        else
+                        {
+                            <img src="#" class="sp-img-preview" id="imagePreview" style="display:none;" />
+                        }
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-sp-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

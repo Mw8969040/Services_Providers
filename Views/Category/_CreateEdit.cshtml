@@ -1,0 +1,47 @@
+@* --- Partial View: Category Create/Edit Form --- *@
+@* بيتحمل جوه الـ Modal بـ AJAX *@
+@model CategoryVM
+
+<form asp-controller="Category" asp-action="@(Model.Id == 0 ? "Create" : "Edit")"
+      method="post" enctype="multipart/form-data" id="categoryForm">
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ImageUrl" />
+
+    <!-- Category Name -->
+    <div class="sp-form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control sp-form-control" placeholder="Enter category name" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <!-- Description -->
+    <div class="sp-form-group">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="form-control sp-form-control" rows="3" placeholder="Enter description"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <!-- Image Upload -->
+    <div class="sp-form-group">
+        <label asp-for="ImageFile"></label>
+        <input asp-for="ImageFile" class="form-control sp-form-control" type="file" accept="image/*" id="ImageFile" />
+
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" class="sp-img-preview mt-2" id="imagePreview" />
+        }
+        else
+        {
+            <img src="#" class="sp-img-preview mt-2" id="imagePreview" style="display:none;" />
+        }
+    </div>
+
+    <!-- Submit -->
+    <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-sp-primary" onclick="submitModalForm('#categoryForm', function() { location.reload(); })">
+            <i class="fas fa-save"></i> Save
+        </button>
+    </div>
+</form>
