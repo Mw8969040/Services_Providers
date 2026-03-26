@@ -1,20 +1,19 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Smart_Platform.Models;
-using X.PagedList;
+using MediatR;
+using SmartPlatform.Application.Features.Admin.Queries;
+using SmartPlatform.Application.Features.Admin.Commands;
 
-namespace Smart_Platform.Controllers
+namespace SmartPlatform.Web.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMediator _mediator;
 
-        public AdminController(UserManager<ApplicationUser> userManager)
+        public AdminController(IMediator mediator)
         {
-            _userManager = userManager;
+            _mediator = mediator;
         }
 
         public async Task<IActionResult> Index(int? page)
@@ -22,14 +21,7 @@ namespace Smart_Platform.Controllers
             int pageNumber = page ?? 1;
             int pageSize = 10;
 
-            var query = _userManager.Users;
-            int totalCount = await query.CountAsync();
-            var items = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var pagedList = new StaticPagedList<ApplicationUser>(items, pageNumber, pageSize, totalCount);
+            var pagedList = await _mediator.Send(new GetUsersQuery(pageNumber, pageSize));
             return View(pagedList);
         }
 
@@ -37,18 +29,7 @@ namespace Smart_Platform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MakeProvider(string Id)
         {
-            var user = await _userManager.FindByIdAsync(Id);
-            if (user != null)
-            {
-                if (!await _userManager.IsInRoleAsync(user, "Provider"))
-                {
-                    await _userManager.AddToRoleAsync(user, "Provider");
-                }
-                if (await _userManager.IsInRoleAsync(user, "Customer"))
-                {
-                    await _userManager.RemoveFromRoleAsync(user, "Customer");
-                }
-            }
+            await _mediator.Send(new MakeProviderCommand(Id));
             return RedirectToAction("Index");
         }
     }

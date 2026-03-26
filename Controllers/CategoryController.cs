@@ -1,14 +1,11 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Smart_Platform.Features.Categories.Commands.CreateCategory;
-using Smart_Platform.Features.Categories.Commands.UpdateCategory;
-using Smart_Platform.Features.Categories.Commands.DeleteCategory;
-using Smart_Platform.Features.Categories.Queries.GetAllCategories;
-using Smart_Platform.Features.Categories.Queries.GetCategoryById;
-using Smart_Platform.ViewModel;
+using SmartPlatform.Application.Features.Categories.Commands;
+using SmartPlatform.Application.Features.Categories.Queries;
+using SmartPlatform.Application.DTOs;
 
-namespace Smart_Platform.Controllers
+namespace SmartPlatform.Web.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class CategoryController : Controller

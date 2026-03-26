@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
 
-namespace Smart_Platform.Filters
+namespace SmartPlatform.Web.Filters
 {
     public class CacheResourceFilter : Attribute, IResourceFilter
     {

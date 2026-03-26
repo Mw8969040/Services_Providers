@@ -1,15 +1,15 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Smart_Platform.Data;
-using Smart_Platform.Models;
+using SmartPlatform.Infrastructure.Data;
+using SmartPlatform.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using Smart_Platform.Data.Seed;
-using Smart_Platform.Mapping;
-using Smart_Platform.Services.Interfaces;
-using Smart_Platform.UOW;
-using Smart_Platform.Services.Implementation;
+using SmartPlatform.Infrastructure.Data.Seed;
+using SmartPlatform.Application.Mapping;
+using SmartPlatform.Application.Common.Interfaces;
+using SmartPlatform.Infrastructure.UOW;
+using SmartPlatform.Application.Features.Services.Queries;
 
-namespace Smart_Platform
+namespace SmartPlatform.Web
 {
     public class Program
     {
@@ -30,13 +30,13 @@ namespace Smart_Platform
             });
 
             // AutoMapper
-            builder.Services.AddAutoMapper(typeof(MappingProfile));
+            builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
             // MediatR
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetServicesQuery).Assembly));
 
             // FluentValidation
-            builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+            builder.Services.AddValidatorsFromAssembly(typeof(GetServicesQuery).Assembly);
 
             // IMemoryCache
             builder.Services.AddMemoryCache();
@@ -48,13 +48,11 @@ namespace Smart_Platform
             });
             builder.Services.AddRazorPages();
 
-            // Unit Of Work
+            // Infrastructure Services
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IReadDbConnection, ReadDbConnection>();
 
-            // Application Services
-            builder.Services.AddScoped<IServiceService, ServiceService>();
-            builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
-            builder.Services.AddScoped<IReviewService, ReviewService>();
+            // MediatR Handlers take care of the business logic formerly held in Services.
 
             var app = builder.Build();
 
@@ -63,7 +61,7 @@ namespace Smart_Platform
                 var ServiceProvider = Scope.ServiceProvider;
 
                 var roleManager = ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                UserManager<ApplicationUser> userManager = ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                var userManager = ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
                 await RoleSeeder.SeedRolesAsync(roleManager);
                 await AdminSeeder.SeedAdminAsync(userManager);

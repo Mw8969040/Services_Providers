@@ -1,29 +1,27 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Smart_Platform.Features.Categories.Queries.GetAllCategories;
-using Smart_Platform.Models;
-using Smart_Platform.Services.Interfaces;
+using SmartPlatform.Application.Features.Categories.Queries;
+using SmartPlatform.Application.Features.Services.Queries;
+using SmartPlatform.Application.DTOs;
 using System.Diagnostics;
 
-namespace Smart_Platform.Controllers
+namespace SmartPlatform.Web.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IMediator _mediator;
-        private readonly IServiceService _serviceService;
 
-        public HomeController(ILogger<HomeController> logger, IMediator mediator, IServiceService serviceService)
+        public HomeController(ILogger<HomeController> logger, IMediator mediator)
         {
             _logger = logger;
             _mediator = mediator;
-            _serviceService = serviceService;
         }
 
         public async Task<IActionResult> Index()
         {
             ViewBag.Categories = await _mediator.Send(new GetAllCategoriesQuery(1, 10));
-            ViewBag.LatestServices = await _serviceService.GetAllAsync(1, 6);
+            ViewBag.LatestServices = await _mediator.Send(new GetServicesQuery(1, 6));
             return View();
         }
 

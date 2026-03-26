@@ -38,7 +38,7 @@
                                 <partial name="_StatusBadge" model="request.requestStatus" />
                             </td>
                             <td>
-                                @if (request.requestStatus == Smart_Platform.Models.RequestStatus.Pending)
+                                @if (request.requestStatus == SmartPlatform.Domain.Entities.RequestStatus.Pending)
                                 {
                                     <form asp-action="Accept" asp-route-requestId="@request.Id" method="post" style="display:inline;">
                                         @Html.AntiForgeryToken()
@@ -53,7 +53,7 @@
                                         </button>
                                     </form>
                                 }
-                                else if (request.requestStatus == Smart_Platform.Models.RequestStatus.Accepted)
+                                else if (request.requestStatus == SmartPlatform.Domain.Entities.RequestStatus.Accepted)
                                 {
                                     <form asp-action="Complete" asp-route-requestId="@request.Id" method="post" style="display:inline;">
                                         @Html.AntiForgeryToken()

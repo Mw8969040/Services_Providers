@@ -1,11 +1,11 @@
 @using X.PagedList
 @using X.PagedList.Mvc.Core
-@model IPagedList<Smart_Platform.Models.ApplicationUser>
+@model IPagedList<SmartPlatform.Domain.Entities.ApplicationUser>
 @{
     ViewData["Title"] = "User Management";
 }
 
-@inject Microsoft.AspNetCore.Identity.UserManager<Smart_Platform.Models.ApplicationUser> UserManager
+@inject Microsoft.AspNetCore.Identity.UserManager<SmartPlatform.Domain.Entities.ApplicationUser> UserManager
 
 <div class="container py-4">
     <div class="sp-page-header">

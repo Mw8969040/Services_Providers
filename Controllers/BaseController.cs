@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-namespace Smart_Platform.Controllers
+namespace SmartPlatform.Web.Controllers
 {
     public class BaseController :Controller
     {

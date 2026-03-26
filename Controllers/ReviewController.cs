@@ -1,40 +1,26 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Smart_Platform.Services.Interfaces;
-using Smart_Platform.ViewModel;
-using Smart_Platform.Models;
-using Smart_Platform.UOW;
-using AutoMapper;
+using MediatR;
+using SmartPlatform.Application.Features.Reviews.Commands;
+using SmartPlatform.Application.Features.Reviews.Queries;
+using SmartPlatform.Application.DTOs;
 
-namespace Smart_Platform.Controllers
+namespace SmartPlatform.Web.Controllers
 {
     [Authorize(Roles = "Customer")]
     public class ReviewController : BaseController
     {
-        private readonly IReviewService _reviewService;
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
 
-        public ReviewController(IReviewService reviewService, IMapper mapper, IUnitOfWork unitOfWork)
+        public ReviewController(IMediator mediator)
         {
-            _reviewService = reviewService;
-            _mapper = mapper;
-            _unitOfWork = unitOfWork;
+            _mediator = mediator;
         }
 
         public async Task<IActionResult> ReviewForm(int requestId)
         {
             ViewBag.RequestId = requestId;
             return PartialView("_ReviewForm");
-        }
-
-        public async Task<IActionResult> Edit(int id)
-        {
-            var review = await _unitOfWork.Repository<Review>().GetByIdAsync(id);
-            if (review == null) return NotFound();
-            
-            var reviewVM = _mapper.Map<ReviewVM>(review);
-            return PartialView("_ReviewForm", reviewVM);
         }
 
         [HttpPost]
@@ -48,7 +34,7 @@ namespace Smart_Platform.Controllers
                 Comment = comment,
             };
 
-            await _reviewService.AddReviewAsync(reviewVM, userId);
+            await _mediator.Send(new CreateReviewCommand(reviewVM));
             
             TempData["Success"] = "Review submitted successfully!";
             return RedirectToAction("MyRequests", "ServiceRequest");
@@ -58,7 +44,7 @@ namespace Smart_Platform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ReviewVM reviewVM)
         {
-            await _reviewService.UpdateReviewAsync(reviewVM, userId);
+            await _mediator.Send(new UpdateReviewCommand(reviewVM, userId));
             TempData["Success"] = "Review updated successfully!";
             return RedirectToAction("MyRequests", "ServiceRequest");
         }
@@ -67,7 +53,7 @@ namespace Smart_Platform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            await _reviewService.DeleteReviewAsync(id, userId);
+            await _mediator.Send(new DeleteReviewCommand(id, userId));
             TempData["Success"] = "Review deleted successfully!";
             return RedirectToAction("MyRequests", "ServiceRequest");
         }

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace Smart_Platform.Filters
+namespace SmartPlatform.Web.Filters
 {
     public class GlobalExceptionFilter : IExceptionFilter
     {

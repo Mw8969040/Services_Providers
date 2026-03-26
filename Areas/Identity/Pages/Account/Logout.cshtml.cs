@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Smart_Platform.Models;
+using SmartPlatform.Domain.Entities;
 
-namespace Smart_Platform.Areas.Identity.Pages.Account
+namespace SmartPlatform.Web.Areas.Identity.Pages.Account
 {
     public class LogoutModel : PageModel
     {

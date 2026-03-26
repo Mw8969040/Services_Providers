@@ -1,29 +1,24 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Smart_Platform.Filters;
-using Smart_Platform.Services.Interfaces;
-using Smart_Platform.ViewModel;
-using Smart_Platform.Features.Categories.Queries.GetAllCategories;
+using SmartPlatform.Application.DTOs;
+using SmartPlatform.Application.Features.Categories.Queries;
+using SmartPlatform.Application.Features.Services.Commands;
+using SmartPlatform.Application.Features.Services.Queries;
+using SmartPlatform.Web.Filters;
 
-namespace Smart_Platform.Controllers
+namespace SmartPlatform.Web.Controllers
 {
 
     [Authorize(Roles ="Provider")]
     public class ServiceController : BaseController
     {
         private readonly IMediator _mediator;
-        private readonly IServiceService _serviceService;
-        private readonly IServiceRequestService _requestService;
-        private readonly IReviewService _reviewService;
 
-        public ServiceController(IMediator mediator , IServiceService serviceService, IServiceRequestService requestService, IReviewService reviewService)
+        public ServiceController(IMediator mediator)
         {
             _mediator = mediator;
-            _serviceService = serviceService;
-            _requestService = requestService;
-            _reviewService = reviewService;
         }
 
 
@@ -32,8 +27,8 @@ namespace Smart_Platform.Controllers
         {
             int pageNumber = page ?? 1;
             int pageSize = 6;
-            var service = await _serviceService.GetByProviderAsync(userId, pageNumber, pageSize);
-            return View(service);
+            var services = await _mediator.Send(new GetServicesQuery(pageNumber, pageSize, providerId: userId));
+            return View(services);
         }
 
         public async Task<IActionResult> Create()
@@ -53,13 +48,13 @@ namespace Smart_Platform.Controllers
                 return View(serviceVM);
             }
 
-            await _serviceService.CreateAsync(serviceVM, userId);
+            await _mediator.Send(new CreateServiceCommand(serviceVM, userId));
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int serviceId)
         {
-            var service = await _serviceService.GetByIdAsync(serviceId);
+            var service = await _mediator.Send(new GetServiceByIdQuery(serviceId));
             if (service == null)
                 return NotFound();
 
@@ -78,7 +73,7 @@ namespace Smart_Platform.Controllers
                 return View(service);
             }
 
-            await _serviceService.UpdateAsync(service.Id, service, userId);
+            await _mediator.Send(new UpdateServiceCommand(service.Id, service, userId));
             return RedirectToAction(nameof(Index));
         }
 
@@ -87,7 +82,7 @@ namespace Smart_Platform.Controllers
         [CacheInvalidationFilter("ServicesIndex", "ServicesCategory")]
         public async Task<IActionResult> Delete(int serviceId)
         {
-            await _serviceService.DeleteAsync(serviceId, userId);
+            await _mediator.Send(new DeleteServiceCommand(serviceId, userId));
             return RedirectToAction(nameof(Index));
         }
 
@@ -97,24 +92,17 @@ namespace Smart_Platform.Controllers
         {
             int pageNumber = page ?? 1;
             int pageSize = 6;
-            var services = await _serviceService.GetByCategoryAsync(categoryId, pageNumber, pageSize);
+            var services = await _mediator.Send(new GetServicesQuery(pageNumber, pageSize, categoryId: categoryId));
             return View(services);
         }
 
         [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
-            var service = await _serviceService.GetByIdAsync(id);
+            var service = await _mediator.Send(new GetServiceByIdQuery(id));
             if (service == null)
                 return NotFound();
-
-            if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))
-            {
-                service.HasPendingRequest = await _requestService.HasPendingRequestAsync(id, userId);
-            }
-
-            service.Reviews = await _reviewService.GetReviewsByServiceAsync(id);
-
+            
             return View(service);
         }
 

@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Smart_Platform.Filters
+namespace SmartPlatform.Web.Filters
 {
     public class CacheInvalidationFilter : Attribute, IActionFilter
     {

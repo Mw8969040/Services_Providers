@@ -1,7 +1,7 @@
 @* --- Partial View: Review Form --- *@
 @* بيتحمل جوه Modal بـ AJAX *@
 
-@model Smart_Platform.ViewModel.ReviewVM
+@model SmartPlatform.Application.DTOs.ReviewVM
 @{
     bool isEdit = Model != null && Model.Id > 0;
     string actionName = isEdit ? "Edit" : "Create";

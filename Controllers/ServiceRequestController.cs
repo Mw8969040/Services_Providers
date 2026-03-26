@@ -1,17 +1,19 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Smart_Platform.Services.Interfaces;
-using Smart_Platform.ViewModel;
+using MediatR;
+using SmartPlatform.Application.Features.ServiceRequests.Commands;
+using SmartPlatform.Application.Features.ServiceRequests.Queries;
+using SmartPlatform.Application.DTOs;
 
-namespace Smart_Platform.Controllers
+namespace SmartPlatform.Web.Controllers
 {
     public class ServiceRequestController : BaseController
     {
-        private readonly IServiceRequestService _requestService;
+        private readonly IMediator _mediator;
 
-        public ServiceRequestController(IServiceRequestService requestService)
+        public ServiceRequestController(IMediator mediator)
         {
-            _requestService = requestService;
+            _mediator = mediator;
         }
 
         [Authorize(Roles = "Provider")]
@@ -19,7 +21,7 @@ namespace Smart_Platform.Controllers
         {
             int pageNumber = page ?? 1;
             int pageSize = 10;
-            var requests = await _requestService.GetRequestsForProviderAsync(userId, pageNumber, pageSize);
+            var requests = await _mediator.Send(new GetServiceRequestsQuery(ProviderId: userId, PageNumber: pageNumber, PageSize: pageSize));
             return View(requests);
         }
 
@@ -28,7 +30,7 @@ namespace Smart_Platform.Controllers
         {
             int pageNumber = page ?? 1;
             int pageSize = 10;
-            var requests = await _requestService.GetRequestsForCustomerAsync(userId, pageNumber, pageSize);
+            var requests = await _mediator.Send(new GetServiceRequestsQuery(CustomerId: userId, PageNumber: pageNumber, PageSize: pageSize));
             return View(requests);
         }
 
@@ -37,7 +39,8 @@ namespace Smart_Platform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(int serviceId)
         {
-            await _requestService.CreateAsync(serviceId, userId);
+            var serviceRequestVM = new ServiceRequestVM { ServiceId = serviceId, CustomerId = userId };
+            await _mediator.Send(new CreateServiceRequestCommand(serviceRequestVM));
             TempData["Success"] = "Service requested successfully!";
             return RedirectToAction(nameof(MyRequests));
         }
@@ -47,7 +50,7 @@ namespace Smart_Platform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Accept(int requestId)
         {
-            await _requestService.AcceptAsync(requestId, userId);
+            await _mediator.Send(new AcceptServiceRequestCommand(requestId, userId));
             TempData["Success"] = "Request accepted!";
             return RedirectToAction(nameof(Index));
         }
@@ -57,7 +60,7 @@ namespace Smart_Platform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reject(int requestId)
         {
-            await _requestService.RejectAsync(requestId, userId);
+            await _mediator.Send(new RejectServiceRequestCommand(requestId, userId));
             TempData["Success"] = "Request rejected.";
             return RedirectToAction(nameof(Index));
         }
@@ -67,7 +70,7 @@ namespace Smart_Platform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Complete(int requestId)
         {
-            await _requestService.CompleteAsync(requestId, userId);
+            await _mediator.Send(new CompleteServiceRequestCommand(requestId, userId));
             TempData["Success"] = "Request marked as completed!";
             return RedirectToAction(nameof(Index));
         }
@@ -77,7 +80,7 @@ namespace Smart_Platform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int requestId)
         {
-            await _requestService.CancelAsync(requestId, userId);
+            await _mediator.Send(new CancelServiceRequestCommand(requestId, userId));
             TempData["Success"] = "Request cancelled.";
             return RedirectToAction(nameof(MyRequests));
         }
