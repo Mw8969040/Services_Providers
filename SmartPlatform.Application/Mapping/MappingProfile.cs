@@ -32,7 +32,8 @@ namespace SmartPlatform.Application.Mapping
                 .ForMember(dest => dest.Customer, opt => opt.Ignore());
 
             CreateMap<Review, ReviewDto>()
-                .ForMember(dest => dest.ServiceTitle, opt => opt.MapFrom(src => src.ServiceRequest.Service.Title));
+                .ForMember(dest => dest.ServiceTitle, opt => opt.MapFrom(src => src.ServiceRequest.Service.Title))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.ReviewDate));
 
             CreateMap<ReviewDto, Review>()
                 .ForMember(dest => dest.ServiceRequest, opt => opt.Ignore());

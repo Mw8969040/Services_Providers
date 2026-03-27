@@ -64,9 +64,11 @@ namespace SmartPlatform.Web
 
                 var roleManager = ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 var userManager = ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                var context = ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
                 await RoleSeeder.SeedRolesAsync(roleManager);
                 await AdminSeeder.SeedAdminAsync(userManager);
+                await DatabaseSeeder.SeedAllAsync(context, userManager);
             }
 
             if (!app.Environment.IsDevelopment())
