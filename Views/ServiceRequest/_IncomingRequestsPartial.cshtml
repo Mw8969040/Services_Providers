@@ -8,12 +8,12 @@
     <div class="alert alert-primary d-flex justify-content-between align-items-center mb-4 shadow-sm border-0" style="border-left: 5px solid var(--primary-dark) !important; border-radius: var(--radius-sm); background-color: var(--primary-light);">
         <div>
             <i class="fas fa-headset me-2 text-primary"></i> 
-            <strong>Newest Request:</strong> @latest.CustomerName 
-            <span class="badge bg-white text-primary border ms-2">
-                <i class="fas fa-phone-alt me-1"></i> @latest.CustomerPhoneNumber
-            </span>
+            <strong>Newest Request:</strong> 
+            <a asp-controller="Profile" asp-action="CustomerPublicProfile" asp-route-userId="@latest.CustomerId" class="text-primary text-decoration-none fw-bold">
+                @latest.CustomerName
+            </a>
             <span class="badge bg-white text-secondary border ms-2">
-                <i class="fas fa-map-marker-alt me-1"></i> @(string.IsNullOrEmpty(latest.CustomerAddress) ? "No Address" : latest.CustomerAddress)
+                <i class="fas fa-info-circle me-1"></i> Click name for details
             </span>
         </div>
         <a href="tel:@latest.CustomerPhoneNumber" class="btn btn-sp-primary btn-sp-sm">
@@ -31,8 +31,6 @@
                     <th>#</th>
                     <th>Service</th>
                     <th>Customer</th>
-                    <th>Phone</th>
-                    <th>Address</th>
                     <th>Date</th>
                     <th>Price</th>
                     <th>Status</th>
@@ -45,9 +43,11 @@
                     <tr id="request-@request.Id">
                         <td>@request.Id</td>
                         <td><strong>@request.ServiceTitle</strong></td>
-                        <td>@request.CustomerName</td>
-                        <td>@request.CustomerPhoneNumber</td>
-                        <td><small class="text-muted">@request.CustomerAddress</small></td>
+                        <td>
+                            <a asp-controller="Profile" asp-action="CustomerPublicProfile" asp-route-userId="@request.CustomerId" class="text-primary text-decoration-none fw-bold">
+                                @request.CustomerName
+                            </a>
+                        </td>
                         <td>@request.RequestDate.ToString("dd/MM/yyyy")</td>
                         <td><span class="sp-price">@request.TotalPrice.ToString("C")</span></td>
                         <td>

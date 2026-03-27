@@ -7,9 +7,9 @@
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-                <div class="card-header bg-dark py-4 text-white d-flex justify-content-between align-items-center px-4">
-                    <h2 class="mb-0"><i class="fas fa-briefcase me-2 text-warning"></i> Professional Dashboard</h2>
-                    <div class="badge bg-warning text-dark p-2 px-3 rounded-pill">
+                <div class="card-header bg-primary py-4 text-white d-flex justify-content-between align-items-center px-4">
+                    <h2 class="mb-0"><i class="fas fa-briefcase me-2"></i> @Model.ProviderName Profile</h2>
+                    <div class="badge bg-white text-primary p-2 px-3 rounded-pill shadow-sm">
                         <i class="fas fa-star me-1"></i> @Model.Rating.ToString("0.0") Rating
                     </div>
                 </div>
@@ -32,14 +32,12 @@
                                             <i class="fas fa-user-tie fa-5x text-muted"></i>
                                         </div>
                                     }
-                                    <!-- Camera Icon Trigger -->
-                                    <div class="position-absolute bottom-0 end-0 bg-warning text-dark rounded-circle p-2 shadow" 
+                                    <div class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow"
                                          style="cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border: 4px solid #fff;"
                                          onclick="document.getElementById('imageFile').click();">
                                         <i class="fas fa-camera"></i>
                                     </div>
                                 </div>
-                                <!-- Hidden File Input -->
                                 <input type="file" name="imageFile" id="imageFile" style="display:none;" onchange="previewImage(this);" />
 
                                 <div class="mt-4 text-start">
@@ -82,8 +80,8 @@
                                 </div>
 
                                 <div class="d-grid mt-5">
-                                    <button type="submit" class="btn btn-dark btn-lg p-3 shadow-sm border-0" style="border-radius: 12px; background: #212529; color: #fff; transition: all 0.3s;">
-                                        <i class="fas fa-save me-2 text-warning"></i> Save Professional Profile
+                                    <button type="submit" class="btn btn-primary btn-lg p-3 shadow-sm border-0" style="border-radius: 12px; transition: all 0.3s;">
+                                        <i class="fas fa-save me-2"></i> Save Professional Profile
                                     </button>
                                 </div>
                             </div>
@@ -96,42 +94,18 @@
 </div>
 
 <style>
-    body { background-color: #f0f2f5; }
+    body {
+        background-color: #f4f7f6;
+    }
+   
     .form-control:focus {
         background-color: #fff !important;
-        box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.2);
-        border: 1px solid #ffc107 !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1); 
+        border: 1px solid #0d6efd !important;
     }
-    .btn-dark:hover {
+
+    .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        background: #000 !important;
-    }
-    .sp-profile-image-placeholder {
-        color: #dee2e6;
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
     }
 </style>
-
-<script>
-    function previewImage(input) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                var preview = document.getElementById('profileImagePreview');
-                var placeholder = document.getElementById('profileImagePreviewPlaceholder');
-                
-                if (preview) {
-                    preview.src = e.target.result;
-                } else if (placeholder) {
-                    // Replace placeholder with img
-                    var img = document.createElement('img');
-                    img.id = 'profileImagePreview';
-                    img.src = e.target.result;
-                    img.className = 'sp-profile-image';
-                    placeholder.parentNode.replaceChild(img, placeholder);
-                }
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-</script>

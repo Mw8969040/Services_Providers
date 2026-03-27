@@ -19,5 +19,8 @@ namespace SmartPlatform.Application.DTOs
 
         [DataType(DataType.ImageUrl)]
         public string? ProfilePictureUrl { get; set; }
+
+        [Display(Name = "Phone Number")]
+        public string? PhoneNumber { get; set; }
     }
 }

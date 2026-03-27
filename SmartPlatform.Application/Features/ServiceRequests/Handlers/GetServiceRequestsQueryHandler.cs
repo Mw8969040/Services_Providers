@@ -42,7 +42,8 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
             var itemsSql = $@"
                 SELECT r.Id, r.RequestDate, r.requestStatus, r.TotalPrice, r.ServiceId, r.CustomerId,
                        s.Title as ServiceTitle, u.FullName as CustomerName, u.PhoneNumber as CustomerPhoneNumber,
-                       cp.Address as CustomerAddress
+                       cp.Address as CustomerAddress,
+                       CASE WHEN EXISTS (SELECT 1 FROM Reviews rev WHERE rev.ServiceRequestId = r.Id AND rev.IsDeleted = 0) THEN 1 ELSE 0 END as IsReviewed
                 FROM ServiceRequests r
                 JOIN Services s ON r.ServiceId = s.Id
                 JOIN AspNetUsers u ON r.CustomerId = u.Id

@@ -30,9 +30,45 @@ namespace SmartPlatform.Infrastructure.Data
             return await _connection.QuerySingleAsync<T>(sql, param);
         }
 
+        public async Task<IMultipleResults> QueryMultipleAsync(string sql, object? param = null)
+        {
+            var gridReader = await _connection.QueryMultipleAsync(sql, param);
+            return new MultipleResults(gridReader);
+        }
+
         public void Dispose()
         {
             _connection.Dispose();
+        }
+
+        private class MultipleResults : IMultipleResults
+        {
+            private readonly SqlMapper.GridReader _gridReader;
+
+            public MultipleResults(SqlMapper.GridReader gridReader)
+            {
+                _gridReader = gridReader;
+            }
+
+            public async Task<IEnumerable<T>> ReadAsync<T>()
+            {
+                return await _gridReader.ReadAsync<T>();
+            }
+
+            public async Task<T?> ReadFirstOrDefaultAsync<T>()
+            {
+                return await _gridReader.ReadFirstOrDefaultAsync<T>();
+            }
+
+            public async Task<T> ReadSingleAsync<T>()
+            {
+                return await _gridReader.ReadSingleAsync<T>();
+            }
+
+            public void Dispose()
+            {
+                _gridReader.Dispose();
+            }
         }
     }
 }

@@ -49,6 +49,14 @@ namespace SmartPlatform.Infrastructure.Data
             modelBuilder.Entity<Review>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<CustomerProfile>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<ProviderProfile>().HasQueryFilter(e => !e.IsDeleted);
+
+            modelBuilder.Entity<Service>()
+                .Property(s => s.BasePrice)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<ServiceRequest>()
+                .Property(sr => sr.TotalPrice)
+                .HasColumnType("decimal(18,2)");
         }
     }
 }

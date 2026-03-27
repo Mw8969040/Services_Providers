@@ -38,12 +38,16 @@
                                     </button>
                                 </form>
                             }
-                            else if (request.requestStatus == SmartPlatform.Application.DTOs.Enums.RequestStatusDto.Completed)
+                            else if (request.requestStatus == SmartPlatform.Application.DTOs.Enums.RequestStatusDto.Completed && !request.IsReviewed)
                             {
                                 <button class="btn btn-sp-warning btn-sp-sm"
                                         onclick="openModal('@Url.Action("ReviewForm", "Review", new { requestId = request.Id })', 'Write a Review')">
                                     <i class="fas fa-star"></i> Review
                                 </button>
+                            }
+                            else if (request.IsReviewed)
+                            {
+                                <span class="badge bg-success"><i class="fas fa-check"></i> Reviewed</span>
                             }
                             else
                             {

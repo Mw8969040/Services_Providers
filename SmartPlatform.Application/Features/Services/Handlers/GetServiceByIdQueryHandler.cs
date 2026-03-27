@@ -33,7 +33,28 @@ namespace SmartPlatform.Application.Features.Services.Handlers
                 LEFT JOIN AspNetUsers u ON s.ProviderId = u.Id
                 WHERE s.Id = @Id AND s.IsDeleted = 0";
 
-            return await _readDbConnection.QueryFirstOrDefaultAsync<ServiceDto>(sql, new { Id = request.Id, CustomerId = request.CustomerId });
+            var serviceDto = await _readDbConnection.QueryFirstOrDefaultAsync<ServiceDto>(sql, new { Id = request.Id, CustomerId = request.CustomerId });
+
+            if (serviceDto != null)
+            {
+                var reviewsSql = @"
+                    SELECT r.Id, r.Rating, r.Comment, r.ReviewDate as CreatedAt, r.ServiceRequestId,
+                           u.FullName as CustomerName, u.Id as CustomerId
+                    FROM Reviews r
+                    INNER JOIN ServiceRequests sr ON r.ServiceRequestId = sr.Id
+                    INNER JOIN AspNetUsers u ON sr.CustomerId = u.Id
+                    WHERE sr.ServiceId = @ServiceId AND r.IsDeleted = 0";
+
+                var reviews = await _readDbConnection.QueryAsync<ReviewDto>(reviewsSql, new { ServiceId = request.Id });
+                serviceDto.Reviews = reviews.ToList();
+                
+                if (serviceDto.Reviews.Any())
+                {
+                    serviceDto.AverageRating = serviceDto.Reviews.Average(r => r.Rating);
+                }
+            }
+
+            return serviceDto;
         }
     }
 }

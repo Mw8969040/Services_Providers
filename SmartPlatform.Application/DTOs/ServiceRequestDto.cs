@@ -16,6 +16,7 @@ namespace SmartPlatform.Application.DTOs
         public SmartPlatform.Application.DTOs.Enums.RequestStatusDto requestStatus { get; set; }
         public decimal TotalPrice { get; set; }
         public string? Notes { get; set; }
+        public bool IsReviewed { get; set; }
         
         // Aliases for compatibility if needed
         public DateTime CreatedDate => RequestDate;

@@ -16,7 +16,10 @@ namespace SmartPlatform.Application.Features.Profiles.Handlers
 
         public async Task<CustomerProfileDto?> Handle(GetCustomerProfileQuery request, CancellationToken cancellationToken)
         {
-            var sql = "SELECT * FROM CustomerProfiles WHERE UserId = @UserId AND IsDeleted = 0";
+            var sql = @"SELECT cp.*, u.PhoneNumber 
+                        FROM CustomerProfiles cp
+                        JOIN AspNetUsers u ON cp.UserId = u.Id
+                        WHERE cp.UserId = @UserId AND cp.IsDeleted = 0";
             return await _readDbConnection.QueryFirstOrDefaultAsync<CustomerProfileDto>(sql, new { UserId = request.UserId });
         }
     }

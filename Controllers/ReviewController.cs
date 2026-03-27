@@ -17,7 +17,7 @@ namespace SmartPlatform.Web.Controllers
             _mediator = mediator;
         }
 
-        public async Task<IActionResult> ReviewForm(int requestId)
+        public IActionResult ReviewForm(int requestId)
         {
             ViewBag.RequestId = requestId;
             return PartialView("_ReviewForm");

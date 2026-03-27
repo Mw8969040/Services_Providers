@@ -66,6 +66,9 @@ namespace SmartPlatform.Web
                 var userManager = ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                 var context = ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
+                // Ensure DB is created and migrated
+                await context.Database.MigrateAsync();
+
                 await RoleSeeder.SeedRolesAsync(roleManager);
                 await AdminSeeder.SeedAdminAsync(userManager);
                 await DatabaseSeeder.SeedAllAsync(context, userManager);

@@ -1,0 +1,69 @@
+@model SmartPlatform.Application.DTOs.CustomerProfileDto
+@{
+    ViewData["Title"] = Model.FullName + " - Profile";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="card-header bg-primary py-4 text-white text-center">
+                    <h2 class="mb-0"><i class="fas fa-user-circle me-2"></i> Customer Profile</h2>
+                </div>
+                <div class="card-body p-5 bg-white text-center">
+                    <div class="sp-profile-image-wrapper mx-auto mb-4" style="width: 150px; height: 150px;">
+                        @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                        {
+                            <img src="@Model.ProfilePictureUrl" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+                        }
+                        else
+                        {
+                            <div class="bg-light d-flex align-items-center justify-content-center h-100" style="border-radius: 50%; border: 5px solid #fff; width: 100%; height: 100%;">
+                                <i class="fas fa-user fa-4x text-muted"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <h3 class="fw-bold mb-1">@Model.FullName</h3>
+                    <p class="text-muted"><i class="fas fa-envelope me-1"></i> Customer</p>
+
+                    <hr class="my-4">
+
+                    <div class="text-start">
+                        <div class="mb-4">
+                            <label class="form-label text-muted text-uppercase fw-bold small"><i class="fas fa-phone-alt me-2"></i> Phone Number</label>
+                            <div class="h5">
+                                @(string.IsNullOrEmpty(Model.PhoneNumber) ? "No Phone Provided" : Model.PhoneNumber)
+                                @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+                                {
+                                    <a href="tel:@Model.PhoneNumber" class="btn btn-outline-primary btn-sm ms-2">
+                                        <i class="fas fa-phone"></i> Call
+                                    </a>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-muted text-uppercase fw-bold small"><i class="fas fa-map-marker-alt me-2"></i> Address / Location</label>
+                            <div class="h5">
+                                @(string.IsNullOrEmpty(Model.Address) ? "No Address Provided" : Model.Address)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5">
+                        <a href="javascript:history.back()" class="btn btn-light btn-lg px-4 shadow-sm" style="border-radius: 12px;">
+                            <i class="fas fa-arrow-left me-2"></i> Back
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body { background-color: #f4f7f6; }
+    .card { transition: all 0.3s; }
+    .btn-outline-primary { border-radius: 8px; }
+</style>

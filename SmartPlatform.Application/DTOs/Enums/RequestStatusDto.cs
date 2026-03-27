@@ -4,8 +4,8 @@ namespace SmartPlatform.Application.DTOs.Enums
     {
         Pending = 0,
         Accepted = 1,
-        Completed = 2,
-        Rejected = 3,
-        Canceled = 4
+        Rejected = 2,
+        Completed = 3,
+        Cancelled = 4
     }
 }

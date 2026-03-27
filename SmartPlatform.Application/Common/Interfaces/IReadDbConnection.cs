@@ -5,5 +5,6 @@ namespace SmartPlatform.Application.Common.Interfaces
         Task<IEnumerable<T>> QueryAsync<T>(string sql, object? param = null);
         Task<T> QueryFirstOrDefaultAsync<T>(string sql, object? param = null);
         Task<T> QuerySingleAsync<T>(string sql, object? param = null);
+        Task<IMultipleResults> QueryMultipleAsync(string sql, object? param = null);
     }
 }

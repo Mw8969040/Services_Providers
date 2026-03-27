@@ -137,5 +137,16 @@ namespace SmartPlatform.Web.Controllers
 
             return View(profile);
         }
+
+        [Authorize(Roles = "Provider,Admin")]
+        public async Task<IActionResult> CustomerPublicProfile(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return NotFound();
+
+            var profile = await _mediator.Send(new GetCustomerProfileQuery(userId));
+            if (profile == null) return NotFound();
+
+            return View(profile);
+        }
     }
 }
