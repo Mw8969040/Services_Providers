@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace SmartPlatform.Application.DTOs
 {
-    public class CategoryVM
+    public class CategoryDto
     {
         public int Id { get; set; }
 

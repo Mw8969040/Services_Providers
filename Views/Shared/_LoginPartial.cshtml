@@ -9,7 +9,7 @@
 {
     <li class="nav-item">
         <a class="nav-link">
-            <i class="fas fa-user-circle"></i> Hello, @User.Identity?.Name!
+            <i class="fas fa-user-circle"></i> Hello, @(User.Identity?.Name?.Contains("@") == true ? User.Identity.Name.Split('@')[0] : User.Identity?.Name)!
         </a>
     </li>
     <li class="nav-item">

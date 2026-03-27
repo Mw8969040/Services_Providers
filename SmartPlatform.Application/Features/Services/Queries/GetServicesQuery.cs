@@ -4,7 +4,7 @@ using SmartPlatform.Application.DTOs;
 
 namespace SmartPlatform.Application.Features.Services.Queries
 {
-    public class GetServicesQuery : IRequest<IPagedList<ServiceVM>>
+    public class GetServicesQuery : IRequest<IPagedList<ServiceDto>>
     {
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;

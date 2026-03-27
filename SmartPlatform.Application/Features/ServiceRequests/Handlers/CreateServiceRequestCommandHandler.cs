@@ -20,7 +20,7 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
 
         public async Task Handle(CreateServiceRequestCommand request, CancellationToken cancellationToken)
         {
-            var serviceRequest = _mapper.Map<ServiceRequest>(request.ServiceRequestVM);
+            var serviceRequest = _mapper.Map<ServiceRequest>(request.ServiceRequestDto);
             serviceRequest.RequestDate = DateTime.Now;
             serviceRequest.requestStatus = RequestStatus.Pending;
 

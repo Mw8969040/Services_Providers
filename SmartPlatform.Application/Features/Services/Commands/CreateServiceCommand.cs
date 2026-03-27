@@ -5,12 +5,12 @@ namespace SmartPlatform.Application.Features.Services.Commands
 {
     public class CreateServiceCommand : IRequest
     {
-        public ServiceVM ServiceVM { get; set; }
+        public ServiceDto ServiceDto { get; set; }
         public string ProviderId { get; set; }
 
-        public CreateServiceCommand(ServiceVM serviceVM, string providerId)
+        public CreateServiceCommand(ServiceDto serviceDto, string providerId)
         {
-            ServiceVM = serviceVM;
+            ServiceDto = serviceDto;
             ProviderId = providerId;
         }
     }

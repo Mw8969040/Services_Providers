@@ -1,6 +1,6 @@
 @using X.PagedList
 @using X.PagedList.Mvc.Core
-@model IPagedList<SmartPlatform.Application.DTOs.UserVM>
+@model IPagedList<SmartPlatform.Application.DTOs.UserDto>
 @{
     ViewData["Title"] = "User Management";
 }
@@ -8,88 +8,13 @@
 @inject Microsoft.AspNetCore.Identity.UserManager<SmartPlatform.Domain.Entities.ApplicationUser> UserManager
 
 <div class="container py-4">
-    <div class="sp-page-header">
-        <h2><i class="fas fa-users-cog"></i> User Management</h2>
+    <div class="sp-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <h2 class="mb-0"><i class="fas fa-users-cog"></i> User Management</h2>
+        
+        <partial name="_AjaxSearch" model='new Dictionary<string, string> { { "Name", "Name" }, { "Email", "Email" }, { "Phone", "Phone" } }' />
     </div>
 
-    @if (Model != null && Model.Any())
-    {
-        <div class="sp-table">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Roles</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in Model)
-                    {
-                        var identityUser = await UserManager.FindByIdAsync(user.Id);
-                        var roles = identityUser != null ? await UserManager.GetRolesAsync(identityUser) : new List<string>();
-                        <tr id="user-@user.Id">
-                            <td>
-                                <strong>@user.FullName</strong>
-                            </td>
-                            <td>@user.Email</td>
-                            <td>
-                                @foreach (var role in roles)
-                                {
-                                    @if (role == "Admin")
-                                    {
-                                        <span class="sp-badge sp-badge-rejected">@role</span>
-                                    }
-                                    else if (role == "Provider")
-                                    {
-                                        <span class="sp-badge sp-badge-accepted">@role</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="sp-badge sp-badge-pending">@role</span>
-                                    }
-                                }
-                            </td>
-                            <td>
-                                @if (!roles.Contains("Admin") && !roles.Contains("Provider"))
-                                {
-                                    <form asp-action="MakeProvider" asp-route-Id="@user.Id" method="post"
-                                          onsubmit="return confirm('Make this user a Provider?');">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sp-primary btn-sp-sm">
-                                            <i class="fas fa-user-tie"></i> Make Provider
-                                        </button>
-                                    </form>
-                                }
-                                else if (roles.Contains("Provider"))
-                                {
-                                    <span class="text-muted"><i class="fas fa-check-circle text-success"></i> Already Provider</span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted"><i class="fas fa-shield-alt text-danger"></i> Admin</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        <div class="mt-4 d-flex justify-content-center">
-            @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions {
-                LiElementClasses = new string[] { "page-item" },
-                PageClasses = new string[] { "page-link" },
-                UlElementClasses = new string[] { "pagination justify-content-center" }
-            })
-        </div>
-    }
-    else
-    {
-        <div class="sp-empty-state">
-            <i class="fas fa-users d-block"></i>
-            <h4>No users found</h4>
-        </div>
-    }
+    <div id="tableContainer">
+        <partial name="_UserTablePartial" model="Model" />
+    </div>
 </div>

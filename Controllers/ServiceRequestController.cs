@@ -17,20 +17,38 @@ namespace SmartPlatform.Web.Controllers
         }
 
         [Authorize(Roles = "Provider")]
-        public async Task<IActionResult> Index(int? page)
+        public async Task<IActionResult> Index(string? searchBy, string? searchTerm, int? page)
         {
             int pageNumber = page ?? 1;
             int pageSize = 10;
-            var requests = await _mediator.Send(new GetServiceRequestsQuery(ProviderId: userId, PageNumber: pageNumber, PageSize: pageSize));
+            
+            ViewBag.SearchBy = searchBy;
+            ViewBag.SearchTerm = searchTerm;
+            
+            var requests = await _mediator.Send(new GetServiceRequestsQuery(searchBy, searchTerm, userId, null, pageNumber, pageSize));
+            
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_IncomingRequestsPartial", requests);
+            }
             return View(requests);
         }
 
         [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> MyRequests(int? page)
+        public async Task<IActionResult> MyRequests(string? searchBy, string? searchTerm, int? page)
         {
             int pageNumber = page ?? 1;
             int pageSize = 10;
-            var requests = await _mediator.Send(new GetServiceRequestsQuery(CustomerId: userId, PageNumber: pageNumber, PageSize: pageSize));
+            
+            ViewBag.SearchBy = searchBy;
+            ViewBag.SearchTerm = searchTerm;
+            
+            var requests = await _mediator.Send(new GetServiceRequestsQuery(searchBy, searchTerm, null, userId, pageNumber, pageSize));
+            
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_OutgoingRequestsPartial", requests);
+            }
             return View(requests);
         }
 
@@ -39,8 +57,8 @@ namespace SmartPlatform.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(int serviceId)
         {
-            var serviceRequestVM = new ServiceRequestVM { ServiceId = serviceId, CustomerId = userId };
-            await _mediator.Send(new CreateServiceRequestCommand(serviceRequestVM));
+            var serviceRequestDto = new ServiceRequestDto { ServiceId = serviceId, CustomerId = userId };
+            await _mediator.Send(new CreateServiceRequestCommand(serviceRequestDto));
             TempData["Success"] = "Service requested successfully!";
             return RedirectToAction(nameof(MyRequests));
         }

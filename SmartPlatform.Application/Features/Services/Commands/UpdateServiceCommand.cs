@@ -6,13 +6,13 @@ namespace SmartPlatform.Application.Features.Services.Commands
     public class UpdateServiceCommand : IRequest
     {
         public int Id { get; set; }
-        public ServiceVM ServiceVM { get; set; }
+        public ServiceDto ServiceDto { get; set; }
         public string ProviderId { get; set; }
 
-        public UpdateServiceCommand(int id, ServiceVM serviceVM, string providerId)
+        public UpdateServiceCommand(int id, ServiceDto serviceDto, string providerId)
         {
             Id = id;
-            ServiceVM = serviceVM;
+            ServiceDto = serviceDto;
             ProviderId = providerId;
         }
     }

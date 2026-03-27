@@ -1,6 +1,6 @@
 @* --- Partial View: Category Create/Edit Form --- *@
 @* بيتحمل جوه الـ Modal بـ AJAX *@
-@model CategoryVM
+@model CategoryDto
 
 <form asp-controller="Category" asp-action="@(Model.Id == 0 ? "Create" : "Edit")"
       method="post" enctype="multipart/form-data" id="categoryForm">

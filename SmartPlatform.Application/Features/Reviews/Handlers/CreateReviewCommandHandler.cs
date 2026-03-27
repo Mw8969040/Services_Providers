@@ -20,12 +20,12 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
 
         public async Task Handle(CreateReviewCommand request, CancellationToken cancellationToken)
         {
-            var serviceRequest = await _unitOfWork.Repository<ServiceRequest>().GetByIdAsync(request.ReviewVM.ServiceRequestId);
+            var serviceRequest = await _unitOfWork.Repository<ServiceRequest>().GetByIdAsync(request.ReviewDto.ServiceRequestId);
             
             if (serviceRequest == null || serviceRequest.requestStatus != RequestStatus.Completed)
                 throw new Exception("Review can only be added for completed requests");
 
-            var review = _mapper.Map<Review>(request.ReviewVM);
+            var review = _mapper.Map<Review>(request.ReviewDto);
             await _unitOfWork.Repository<Review>().AddAsync(review);
             await _unitOfWork.CompleteAsync();
         }

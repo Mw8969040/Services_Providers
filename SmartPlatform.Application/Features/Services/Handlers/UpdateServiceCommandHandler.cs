@@ -13,11 +13,13 @@ namespace SmartPlatform.Application.Features.Services.Handlers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _env;
+        private readonly ICacheService _cacheService;
 
-        public UpdateServiceCommandHandler(IUnitOfWork unitOfWork, IWebHostEnvironment env)
+        public UpdateServiceCommandHandler(IUnitOfWork unitOfWork, IWebHostEnvironment env, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _env = env;
+            _cacheService = cacheService;
         }
 
         public async Task Handle(UpdateServiceCommand request, CancellationToken cancellationToken)
@@ -27,19 +29,21 @@ namespace SmartPlatform.Application.Features.Services.Handlers
             if (service == null) throw new Exception("Service not found");
             if (service.ProviderId != request.ProviderId) throw new UnauthorizedAccessException();
 
-            service.Title = request.ServiceVM.Title;
-            service.Description = request.ServiceVM.Description;
-            service.BasePrice = request.ServiceVM.BasePrice;
-            service.IsAvailable = request.ServiceVM.IsAvailable;
-            service.CategoryId = request.ServiceVM.CategoryId;
+            service.Title = request.ServiceDto.Title;
+            service.Description = request.ServiceDto.Description;
+            service.BasePrice = request.ServiceDto.BasePrice;
+            service.IsAvailable = request.ServiceDto.IsAvailable;
+            service.CategoryId = request.ServiceDto.CategoryId;
 
-            if (request.ServiceVM.ImageFile != null)
+            if (request.ServiceDto.ImageFile != null)
             {
-                service.ImageUrl = await SaveImageAsync(request.ServiceVM.ImageFile);
+                service.ImageUrl = await SaveImageAsync(request.ServiceDto.ImageFile);
             }
 
             _unitOfWork.Repository<Service>().Update(service);
             await _unitOfWork.CompleteAsync();
+
+            await _cacheService.RemoveAsync($"Service_{request.Id}");
         }
 
         private async Task<string> SaveImageAsync(IFormFile imageFile)

@@ -25,11 +25,11 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
 
         public async Task Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
         {
-            var category = _mapper.Map<ServiceCategory>(request.CategoryVM);
+            var category = _mapper.Map<ServiceCategory>(request.CategoryDto);
 
-            if (request.CategoryVM.ImageFile != null)
+            if (request.CategoryDto.ImageFile != null)
             {
-                category.ImageUrl = await SaveImageAsync(request.CategoryVM.ImageFile);
+                category.ImageUrl = await SaveImageAsync(request.CategoryDto.ImageFile);
             }
 
             await _unitOfWork.Repository<ServiceCategory>().AddAsync(category);

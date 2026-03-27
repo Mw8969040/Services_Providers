@@ -1,83 +1,18 @@
 @using X.PagedList
 @using X.PagedList.Mvc.Core
-@model IPagedList<ServiceRequestVM>
+@model IPagedList<ServiceRequestDto>
 @{
     ViewData["Title"] = "My Requests";
 }
 
 <div class="container py-4">
-    <div class="sp-page-header">
-        <h2><i class="fas fa-shopping-bag"></i> My Requests</h2>
+    <div class="sp-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <h2 class="mb-0"><i class="fas fa-shopping-bag"></i> My Requests</h2>
+        
+        <partial name="_AjaxSearch" model='new Dictionary<string, string> { { "Service", "Service Title" } }' />
     </div>
 
-    @if (Model != null && Model.Any())
-    {
-        <div class="sp-table">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Service</th>
-                        <th>Date</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var request in Model)
-                    {
-                        <tr id="my-request-@request.Id">
-                            <td>@request.Id</td>
-                            <td><strong>@request.ServiceTitle</strong></td>
-                            <td>@request.RequestDate.ToString("dd/MM/yyyy")</td>
-                            <td><span class="sp-price">@request.TotalPrice.ToString("C")</span></td>
-                            <td>
-                                <partial name="_StatusBadge" model="request.requestStatus" />
-                            </td>
-                            <td>
-                                @if (request.requestStatus == SmartPlatform.Domain.Entities.RequestStatus.Pending)
-                                {
-                                    <form asp-action="Cancel" asp-route-requestId="@request.Id" method="post"
-                                          onsubmit="return confirm('Are you sure you want to cancel this request?');">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sp-danger btn-sp-sm">
-                                            <i class="fas fa-ban"></i> Cancel
-                                        </button>
-                                    </form>
-                                }
-                                else if (request.requestStatus == SmartPlatform.Domain.Entities.RequestStatus.Completed)
-                                {
-                                    <button class="btn btn-sp-warning btn-sp-sm"
-                                            onclick="openModal('@Url.Action("ReviewForm", "Review", new { requestId = request.Id })', 'Write a Review')">
-                                        <i class="fas fa-star"></i> Review
-                                    </button>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">—</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        <div class="mt-4 d-flex justify-content-center">
-            @Html.PagedListPager(Model, page => Url.Action("MyRequests", new { page }), new PagedListRenderOptions {
-                LiElementClasses = new string[] { "page-item" },
-                PageClasses = new string[] { "page-link" },
-                UlElementClasses = new string[] { "pagination justify-content-center" }
-            })
-        </div>
-    }
-    else
-    {
-        <div class="sp-empty-state">
-            <i class="fas fa-shopping-bag d-block"></i>
-            <h4>No requests yet</h4>
-            <p>Your service requests will appear here once you make them.</p>
-        </div>
-    }
+    <div id="tableContainer">
+        <partial name="_OutgoingRequestsPartial" model="Model" />
+    </div>
 </div>

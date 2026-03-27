@@ -10,5 +10,7 @@ namespace SmartPlatform.Domain.Entities
 
         public ICollection<Service> Services { get; set; } = new HashSet<Service>();
         public ICollection<ServiceRequest> Requests { get; set; } = new HashSet<ServiceRequest>();
+        public virtual CustomerProfile? CustomerProfile { get; set; }
+        public virtual ProviderProfile? ProviderProfile { get; set; }
     }
 }

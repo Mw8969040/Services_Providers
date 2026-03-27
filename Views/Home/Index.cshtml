@@ -1,7 +1,7 @@
-﻿@{
+@{
     ViewData["Title"] = "Home";
-    var categories = ViewBag.Categories as IEnumerable<CategoryVM>;
-    var services = ViewBag.LatestServices as IEnumerable<ServiceVM>;
+    var categories = ViewBag.Categories as IEnumerable<CategoryDto>;
+    var services = ViewBag.LatestServices as IEnumerable<ServiceDto>;
 }
 
 <!-- ===== Hero Section ===== -->

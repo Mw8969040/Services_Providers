@@ -6,7 +6,7 @@ using SmartPlatform.Application.Features.ServiceRequests.Queries;
 
 namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
 {
-    public class GetServiceRequestsQueryHandler : IRequestHandler<GetServiceRequestsQuery, IPagedList<ServiceRequestVM>>
+    public class GetServiceRequestsQueryHandler : IRequestHandler<GetServiceRequestsQuery, IPagedList<ServiceRequestDto>>
     {
         private readonly IReadDbConnection _readDbConnection;
 
@@ -15,41 +15,67 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
             _readDbConnection = readDbConnection;
         }
 
-        public async Task<IPagedList<ServiceRequestVM>> Handle(GetServiceRequestsQuery request, CancellationToken cancellationToken)
+        public async Task<IPagedList<ServiceRequestDto>> Handle(GetServiceRequestsQuery request, CancellationToken cancellationToken)
         {
             var offset = (request.PageNumber - 1) * request.PageSize;
 
-            var itemsSql = @"
+            string searchCondition = "";
+            var searchParam = string.IsNullOrWhiteSpace(request.SearchTerm) ? null : $"%{request.SearchTerm}%";
+            
+            if (searchParam != null)
+            {
+                switch (request.SearchBy?.ToLower())
+                {
+                    case "customer":
+                        searchCondition = "AND u.FullName LIKE @Search";
+                        break;
+                    case "phone":
+                        searchCondition = "AND u.PhoneNumber LIKE @Search";
+                        break;
+                    case "service":
+                    default:
+                        searchCondition = "AND s.Title LIKE @Search";
+                        break;
+                }
+            }
+
+            var itemsSql = $@"
                 SELECT r.Id, r.RequestDate, r.requestStatus, r.TotalPrice, r.ServiceId, r.CustomerId,
-                       s.Title as ServiceTitle, u.FullName as CustomerName
+                       s.Title as ServiceTitle, u.FullName as CustomerName, u.PhoneNumber as CustomerPhoneNumber,
+                       cp.Address as CustomerAddress
+                FROM ServiceRequests r
+                JOIN Services s ON r.ServiceId = s.Id
+                JOIN AspNetUsers u ON r.CustomerId = u.Id
+                LEFT JOIN CustomerProfiles cp ON u.Id = cp.UserId
+                WHERE (@ProviderId IS NULL OR s.ProviderId = @ProviderId)
+                  AND (@CustomerId IS NULL OR r.CustomerId = @CustomerId)
+                  {searchCondition}
+                  AND r.IsDeleted = 0
+                ORDER BY r.RequestDate DESC
+                OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
+
+            var countSql = $@"
+                SELECT COUNT(*) 
                 FROM ServiceRequests r
                 JOIN Services s ON r.ServiceId = s.Id
                 JOIN AspNetUsers u ON r.CustomerId = u.Id
                 WHERE (@ProviderId IS NULL OR s.ProviderId = @ProviderId)
                   AND (@CustomerId IS NULL OR r.CustomerId = @CustomerId)
-                  AND r.IsDeleted = 0
-                ORDER BY r.RequestDate DESC
-                OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
-
-            var countSql = @"
-                SELECT COUNT(*) 
-                FROM ServiceRequests r
-                JOIN Services s ON r.ServiceId = s.Id
-                WHERE (@ProviderId IS NULL OR s.ProviderId = @ProviderId)
-                  AND (@CustomerId IS NULL OR r.CustomerId = @CustomerId)
+                  {searchCondition}
                   AND r.IsDeleted = 0;";
 
             var parameters = new { 
+                Search = searchParam,
                 ProviderId = request.ProviderId, 
                 CustomerId = request.CustomerId,
                 Offset = offset, 
                 PageSize = request.PageSize 
             };
 
-            var items = await _readDbConnection.QueryAsync<ServiceRequestVM>(itemsSql, parameters);
+            var items = await _readDbConnection.QueryAsync<ServiceRequestDto>(itemsSql, parameters);
             var totalCount = await _readDbConnection.QuerySingleAsync<int>(countSql, parameters);
 
-            return new StaticPagedList<ServiceRequestVM>(items, request.PageNumber, request.PageSize, totalCount);
+            return new StaticPagedList<ServiceRequestDto>(items, request.PageNumber, request.PageSize, totalCount);
         }
     }
 }

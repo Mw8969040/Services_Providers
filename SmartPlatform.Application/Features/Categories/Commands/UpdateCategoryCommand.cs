@@ -3,5 +3,5 @@ using SmartPlatform.Application.DTOs;
 
 namespace SmartPlatform.Application.Features.Categories.Commands
 {
-    public record UpdateCategoryCommand(CategoryVM CategoryVM) : IRequest;
+    public record UpdateCategoryCommand(CategoryDto CategoryDto) : IRequest;
 }

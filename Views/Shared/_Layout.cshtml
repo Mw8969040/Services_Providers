@@ -1,10 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Smart Platform</title>
 
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
@@ -63,6 +66,12 @@
                                 <i class="fas fa-inbox"></i> Requests
                             </a>
                         </li>
+                        <!-- بروفايلي — للـ Provider فقط -->
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Profile" asp-action="Index">
+                                <i class="fas fa-user-gear"></i> My Profile
+                            </a>
+                        </li>
                     }
 
                     @if (User.IsInRole("Customer"))
@@ -71,6 +80,21 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="ServiceRequest" asp-action="MyRequests">
                                 <i class="fas fa-shopping-bag"></i> My Requests
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Profile" asp-action="Index">
+                                <i class="fas fa-user-circle"></i> My Profile
+                            </a>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("Admin") || User.IsInRole("Provider"))
+                    {
+                        <!-- الإحصائيات — للـ Admin والـ Provider -->
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
+                                <i class="fas fa-chart-line"></i> Dashboard
                             </a>
                         </li>
                     }

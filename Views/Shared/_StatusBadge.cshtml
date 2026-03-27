@@ -1,22 +1,22 @@
 @* --- Partial View: Status Badge --- *@
 @* بيعرض الـ Status كـ Badge بلون مختلف *@
-@model SmartPlatform.Domain.Entities.RequestStatus
+@model SmartPlatform.Application.DTOs.Enums.RequestStatusDto
 
 @switch (Model)
 {
-    case SmartPlatform.Domain.Entities.RequestStatus.Pending:
+    case SmartPlatform.Application.DTOs.Enums.RequestStatusDto.Pending:
         <span class="sp-badge sp-badge-pending"><i class="fas fa-clock"></i> Pending</span>
         break;
-    case SmartPlatform.Domain.Entities.RequestStatus.Accepted:
+    case SmartPlatform.Application.DTOs.Enums.RequestStatusDto.Accepted:
         <span class="sp-badge sp-badge-accepted"><i class="fas fa-check"></i> Accepted</span>
         break;
-    case SmartPlatform.Domain.Entities.RequestStatus.Completed:
+    case SmartPlatform.Application.DTOs.Enums.RequestStatusDto.Completed:
         <span class="sp-badge sp-badge-completed"><i class="fas fa-check-double"></i> Completed</span>
         break;
-    case SmartPlatform.Domain.Entities.RequestStatus.Rejected:
+    case SmartPlatform.Application.DTOs.Enums.RequestStatusDto.Rejected:
         <span class="sp-badge sp-badge-rejected"><i class="fas fa-times"></i> Rejected</span>
         break;
-    case SmartPlatform.Domain.Entities.RequestStatus.Cancelled:
+    case SmartPlatform.Application.DTOs.Enums.RequestStatusDto.Canceled:
         <span class="sp-badge sp-badge-cancelled"><i class="fas fa-ban"></i> Cancelled</span>
         break;
 }

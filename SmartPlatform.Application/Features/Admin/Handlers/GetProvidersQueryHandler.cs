@@ -5,7 +5,7 @@ using SmartPlatform.Application.Features.Admin.Queries;
 
 namespace SmartPlatform.Application.Features.Admin.Handlers
 {
-    public class GetProvidersQueryHandler : IRequestHandler<GetProvidersQuery, IEnumerable<UserVM>>
+    public class GetProvidersQueryHandler : IRequestHandler<GetProvidersQuery, IEnumerable<UserDto>>
     {
         private readonly IReadDbConnection _readDbConnection;
 
@@ -14,7 +14,7 @@ namespace SmartPlatform.Application.Features.Admin.Handlers
             _readDbConnection = readDbConnection;
         }
 
-        public async Task<IEnumerable<UserVM>> Handle(GetProvidersQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<UserDto>> Handle(GetProvidersQuery request, CancellationToken cancellationToken)
         {
             var sql = @"
                 SELECT u.Id, u.FullName, u.Email, u.PhoneNumber, u.ProfileImage, u.IsActive,
@@ -26,7 +26,7 @@ namespace SmartPlatform.Application.Features.Admin.Handlers
 
             var users = await _readDbConnection.QueryAsync<dynamic>(sql);
             
-            return users.Select(u => new UserVM
+            return users.Select(u => new UserDto
             {
                 Id = u.Id,
                 FullName = u.FullName,

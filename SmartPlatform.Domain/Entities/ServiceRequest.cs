@@ -2,7 +2,7 @@ namespace SmartPlatform.Domain.Entities
 {
     public class ServiceRequest : BaseEntity
     {
-        public string CustomerId { get; set; }
+        public string CustomerId { get; set; } = string.Empty;
         public ApplicationUser Customer { get; set; }
 
         public int ServiceId { get; set; }

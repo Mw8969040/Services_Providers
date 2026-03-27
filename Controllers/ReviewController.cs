@@ -27,14 +27,14 @@ namespace SmartPlatform.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(int requestId, int rating, string comment)
         {
-            ReviewVM reviewVM = new ReviewVM
+            ReviewDto reviewDto = new ReviewDto
             {
                 ServiceRequestId = requestId,
                 Rating = rating,
                 Comment = comment,
             };
 
-            await _mediator.Send(new CreateReviewCommand(reviewVM));
+            await _mediator.Send(new CreateReviewCommand(reviewDto));
             
             TempData["Success"] = "Review submitted successfully!";
             return RedirectToAction("MyRequests", "ServiceRequest");
@@ -42,9 +42,9 @@ namespace SmartPlatform.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(ReviewVM reviewVM)
+        public async Task<IActionResult> Edit(ReviewDto reviewDto)
         {
-            await _mediator.Send(new UpdateReviewCommand(reviewVM, userId));
+            await _mediator.Send(new UpdateReviewCommand(reviewDto, userId));
             TempData["Success"] = "Review updated successfully!";
             return RedirectToAction("MyRequests", "ServiceRequest");
         }

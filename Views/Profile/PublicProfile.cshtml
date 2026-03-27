@@ -1,0 +1,80 @@
+@model ProviderProfileDto
+@{
+    ViewData["Title"] = Model.ProviderName + " - Profile";
+}
+
+<div class="container py-5">
+    <div class="sp-public-profile shadow-lg p-0 bg-white" style="border-radius: 25px; overflow: hidden; border: 1px solid #eee;">
+        <!-- Header Section -->
+        <div class="sp-profile-header position-relative" style="height: 250px; background: linear-gradient(135deg, #0d6efd 0%, #00d2ff 100%);">
+            <div class="position-absolute w-100 text-center" style="bottom: -80px;">
+                <div class="d-inline-block p-1 bg-white rounded-circle shadow">
+                    @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                    {
+                        <img src="@Model.ProfilePictureUrl" alt="@Model.ProviderName" class="rounded-circle" style="width: 160px; height: 160px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 160px; height: 160px;">
+                            <i class="fas fa-user-tie fa-5x text-muted"></i>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="sp-profile-content text-center pt-5 pb-5 px-4 mt-5">
+            <h1 class="display-6 fw-bold mb-1">@Model.ProviderName</h1>
+            <p class="text-primary fw-bold mb-3 fs-5">
+                <i class="fas fa-certificate"></i> @Model.BusinessName
+            </p>
+            
+            <div class="d-flex justify-content-center gap-3 mb-4">
+                <div class="bg-light p-2 px-3 rounded-pill border">
+                    <i class="fas fa-star text-warning"></i> @Model.Rating.ToString("0.0") / 5.0
+                </div>
+                <div class="bg-light p-2 px-3 rounded-pill border">
+                    <i class="fas fa-briefcase text-muted"></i> Professional Verified
+                </div>
+                @if (Model.YearsOfExperience > 0)
+                {
+                    <div class="bg-light p-2 px-3 rounded-pill border">
+                        <i class="fas fa-award text-success"></i> @Model.YearsOfExperience Years Experience
+                    </div>
+                }
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card border-0 bg-light p-4" style="border-radius: 15px;">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-info-circle text-primary"></i> About This Provider</h5>
+                        <p class="text-muted mb-0" style="line-height: 1.8; font-size: 1.1rem;">
+                            @(string.IsNullOrEmpty(Model.Description) ? "This provider hasn't written a biography yet, but they are ready to serve you with excellence." : Model.Description)
+                        </p>
+                    </div>
+                    
+                    <div class="mt-5">
+                        <a href="javascript:history.back()" class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Services
+                        </a>
+                        <button class="btn btn-primary rounded-pill px-5 ms-3 shadow-sm">
+                            <i class="fas fa-comment-dots me-2"></i> Contact Provider
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body { background-color: #f8f9fa; }
+    .sp-public-profile {
+        animation: slideUp 0.6s ease-out;
+    }
+    @@keyframes slideUp {
+        from { transform: translateY(30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+</style>

@@ -20,12 +20,17 @@ namespace SmartPlatform.Infrastructure.Repositories
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet.AsNoTracking().ToListAsync();
         }
 
         public async Task<TEntity?> GetByIdAsync(int id)
         {
-            return await _dbSet.FindAsync(id);
+            var entity = await _dbSet.FindAsync(id);
+            if (entity != null)
+            {
+                _context.Entry(entity).State = EntityState.Detached;
+            }
+            return entity;
         }
 
         public async Task AddAsync(TEntity entity)
@@ -58,7 +63,7 @@ namespace SmartPlatform.Infrastructure.Repositories
             {
                 query = query.Include(include);
             }
-            return await query.FirstOrDefaultAsync(predicate);
+            return await query.AsNoTracking().FirstOrDefaultAsync(predicate);
         }
 
         public async Task<IEnumerable<TEntity>> GetAllWithIncludesAsync(Expression<Func<TEntity, bool>> predicate, params string[] includes)
@@ -68,13 +73,13 @@ namespace SmartPlatform.Infrastructure.Repositories
             {
                 query = query.Include(include);
             }
-            return await query.Where(predicate).ToListAsync();
+            return await query.AsNoTracking().Where(predicate).ToListAsync();
         }
 
         public async Task<IPagedList<TEntity>> GetPagedAsync(int pageNumber, int pageSize)
         {
             var count = await _dbSet.CountAsync();
-            var items = await _dbSet
+            var items = await _dbSet.AsNoTracking()
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -97,7 +102,7 @@ namespace SmartPlatform.Infrastructure.Repositories
             }
 
             var count = await query.CountAsync();
-            var items = await query
+            var items = await query.AsNoTracking()
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

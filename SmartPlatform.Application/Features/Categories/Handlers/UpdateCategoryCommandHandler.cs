@@ -21,16 +21,16 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
 
         public async Task Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
         {
-            var category = await _unitOfWork.Repository<ServiceCategory>().GetByIdAsync(request.CategoryVM.Id);
+            var category = await _unitOfWork.Repository<ServiceCategory>().GetByIdAsync(request.CategoryDto.Id);
             
             if (category == null) throw new Exception("Category not found");
 
-            category.Name = request.CategoryVM.Name;
-            category.Description = request.CategoryVM.Description;
+            category.Name = request.CategoryDto.Name;
+            category.Description = request.CategoryDto.Description;
 
-            if (request.CategoryVM.ImageFile != null)
+            if (request.CategoryDto.ImageFile != null)
             {
-                category.ImageUrl = await SaveImageAsync(request.CategoryVM.ImageFile);
+                category.ImageUrl = await SaveImageAsync(request.CategoryDto.ImageFile);
             }
 
             _unitOfWork.Repository<ServiceCategory>().Update(category);

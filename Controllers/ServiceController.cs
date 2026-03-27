@@ -6,7 +6,7 @@ using SmartPlatform.Application.DTOs;
 using SmartPlatform.Application.Features.Categories.Queries;
 using SmartPlatform.Application.Features.Services.Commands;
 using SmartPlatform.Application.Features.Services.Queries;
-using SmartPlatform.Web.Filters;
+
 
 namespace SmartPlatform.Web.Controllers
 {
@@ -22,7 +22,6 @@ namespace SmartPlatform.Web.Controllers
         }
 
 
-        [CacheResourceFilter("ServicesIndex")]
         public async Task<IActionResult> Index(int? page)
         {
             int pageNumber = page ?? 1;
@@ -39,22 +38,21 @@ namespace SmartPlatform.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [CacheInvalidationFilter("ServicesIndex", "ServicesCategory")]
-        public async Task<IActionResult> Create(ServiceVM serviceVM)
+        public async Task<IActionResult> Create(ServiceDto serviceDto)
         {
             if(!ModelState.IsValid)
             {
                 await LoadCategories();
-                return View(serviceVM);
+                return View(serviceDto);
             }
 
-            await _mediator.Send(new CreateServiceCommand(serviceVM, userId));
+            await _mediator.Send(new CreateServiceCommand(serviceDto, userId));
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int serviceId)
         {
-            var service = await _mediator.Send(new GetServiceByIdQuery(serviceId));
+            var service = await _mediator.Send(new GetServiceByIdQuery(serviceId, userId));
             if (service == null)
                 return NotFound();
 
@@ -64,8 +62,7 @@ namespace SmartPlatform.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [CacheInvalidationFilter("ServicesIndex", "ServicesCategory")]
-        public async Task<IActionResult> Edit(ServiceVM service, int CategoryId)
+        public async Task<IActionResult> Edit(ServiceDto service, int CategoryId)
         {
             if (!ModelState.IsValid)
             {
@@ -79,7 +76,6 @@ namespace SmartPlatform.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [CacheInvalidationFilter("ServicesIndex", "ServicesCategory")]
         public async Task<IActionResult> Delete(int serviceId)
         {
             await _mediator.Send(new DeleteServiceCommand(serviceId, userId));
@@ -87,7 +83,6 @@ namespace SmartPlatform.Web.Controllers
         }
 
         [AllowAnonymous]
-        [CacheResourceFilter("ServicesCategory")]
         public async Task<IActionResult> GetByCategory(int categoryId, int? page)
         {
             int pageNumber = page ?? 1;
@@ -99,7 +94,7 @@ namespace SmartPlatform.Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
-            var service = await _mediator.Send(new GetServiceByIdQuery(id));
+            var service = await _mediator.Send(new GetServiceByIdQuery(id, userId));
             if (service == null)
                 return NotFound();
             

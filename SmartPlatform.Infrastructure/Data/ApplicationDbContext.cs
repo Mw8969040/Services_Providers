@@ -12,10 +12,24 @@ namespace SmartPlatform.Infrastructure.Data
         public DbSet<ServiceRequest> ServiceRequests { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<CustomerProfile> CustomerProfiles { get; set; }
+        public DbSet<ProviderProfile> ProviderProfiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(a => a.CustomerProfile)
+                .WithOne(u => u.User)
+                .HasForeignKey<CustomerProfile>(u => u.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(a => a.ProviderProfile)
+                .WithOne(u => u.User)
+                .HasForeignKey<ProviderProfile>(u => u.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ServiceRequest>()
                 .HasOne(sr => sr.Customer)
@@ -33,6 +47,8 @@ namespace SmartPlatform.Infrastructure.Data
             modelBuilder.Entity<ServiceCategory>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<ServiceRequest>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Review>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CustomerProfile>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<ProviderProfile>().HasQueryFilter(e => !e.IsDeleted);
         }
     }
 }

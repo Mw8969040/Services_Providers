@@ -24,12 +24,12 @@ namespace SmartPlatform.Application.Features.Services.Handlers
 
         public async Task Handle(CreateServiceCommand request, CancellationToken cancellationToken)
         {
-            var service = _mapper.Map<Service>(request.ServiceVM);
+            var service = _mapper.Map<Service>(request.ServiceDto);
             service.ProviderId = request.ProviderId;
 
-            if (request.ServiceVM.ImageFile != null)
+            if (request.ServiceDto.ImageFile != null)
             {
-                service.ImageUrl = await SaveImageAsync(request.ServiceVM.ImageFile);
+                service.ImageUrl = await SaveImageAsync(request.ServiceDto.ImageFile);
             }
 
             await _unitOfWork.Repository<Service>().AddAsync(service);

@@ -16,12 +16,21 @@ namespace SmartPlatform.Web.Controllers
             _mediator = mediator;
         }
 
-        public async Task<IActionResult> Index(int? page)
+        public async Task<IActionResult> Index(string? searchBy, string? searchTerm, int? page)
         {
             int pageNumber = page ?? 1;
             int pageSize = 10;
 
-            var pagedList = await _mediator.Send(new GetUsersQuery(pageNumber, pageSize));
+            ViewBag.SearchBy = searchBy;
+            ViewBag.SearchTerm = searchTerm;
+            
+            var pagedList = await _mediator.Send(new GetUsersQuery(searchBy, searchTerm, pageNumber, pageSize));
+            
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_UserTablePartial", pagedList);
+            }
+            
             return View(pagedList);
         }
 

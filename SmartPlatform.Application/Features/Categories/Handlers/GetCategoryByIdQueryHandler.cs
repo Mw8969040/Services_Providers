@@ -5,7 +5,7 @@ using SmartPlatform.Application.Features.Categories.Queries;
 
 namespace SmartPlatform.Application.Features.Categories.Handlers
 {
-    public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQuery, CategoryVM?>
+    public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQuery, CategoryDto?>
     {
         private readonly IReadDbConnection _readDbConnection;
 
@@ -14,7 +14,7 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
             _readDbConnection = readDbConnection;
         }
 
-        public async Task<CategoryVM?> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
+        public async Task<CategoryDto?> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
         {
             var sql = @"
                 SELECT c.Id, c.Name, c.Description, c.ImageUrl,
@@ -22,7 +22,7 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
                 FROM ServiceCategories c
                 WHERE c.Id = @Id AND c.IsDeleted = 0";
 
-            return await _readDbConnection.QueryFirstOrDefaultAsync<CategoryVM>(sql, new { Id = request.Id });
+            return await _readDbConnection.QueryFirstOrDefaultAsync<CategoryDto>(sql, new { Id = request.Id });
         }
     }
 }

@@ -1,0 +1,113 @@
+@model Dictionary<string, string>
+
+<form id="ajaxSearchForm" class="d-flex" style="max-width: 500px; width: 100%;">
+    <div class="input-group shadow-sm">
+        @if (Model != null && Model.Count > 0)
+        {
+            <select name="searchBy" class="form-select border-0 bg-light" style="max-width: 140px;">
+                @foreach (var option in Model)
+                {
+                    bool isSelected = ViewBag.SearchBy == option.Key || (string.IsNullOrEmpty(ViewBag.SearchBy as string) && option.Key == Model.First().Key);
+                    if (isSelected)
+                    {
+                        <option value="@option.Key" selected>@option.Value</option>
+                    }
+                    else
+                    {
+                        <option value="@option.Key">@option.Value</option>
+                    }
+                }
+            </select>
+        }
+        <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control border-0 bg-white" placeholder="Search..." autocomplete="off" />
+        <button type="submit" class="btn btn-sp-primary px-4"><i class="fas fa-search"></i></button>
+        <button type="button" id="clearSearchBtn" class="btn btn-light border-0" style="display: @(string.IsNullOrEmpty(ViewBag.SearchTerm) ? "none" : "block");">
+            <i class="fas fa-times text-muted"></i>
+        </button>
+    </div>
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof jQuery === 'undefined') {
+            console.error("jQuery is required for the AJAX Search component to function.");
+            return;
+        }
+
+        let timer;
+        const $form = $('#ajaxSearchForm');
+        const $input = $form.find('input[name="searchTerm"]');
+        const $select = $form.find('select[name="searchBy"]');
+        const $clearBtn = $('#clearSearchBtn');
+        const $container = $('#tableContainer');
+
+        function triggerSearch(urlOverride = null) {
+            const baseUrl = window.location.pathname;
+            const data = $form.serialize();
+            const targetUrl = urlOverride || baseUrl;
+            const urlWithParams = urlOverride || (baseUrl + '?' + data);
+            
+            $.ajax({
+                url: targetUrl,
+                type: 'GET',
+                data: urlOverride ? null : data,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                success: function (result) {
+                    $container.html(result);
+                    window.history.replaceState(null, '', urlWithParams);
+                },
+                error: function (err) {
+                    console.error("AJAX request failed:", err);
+                }
+            });
+        }
+
+        $input.on('input', function () {
+            if ($(this).val().length > 0) {
+                $clearBtn.show();
+            } else {
+                $clearBtn.hide();
+            }
+            clearTimeout(timer);
+            timer = setTimeout(() => triggerSearch(), 500);
+        });
+
+        $select.on('change', function () {
+            triggerSearch();
+        });
+
+        $clearBtn.on('click', function() {
+            $input.val('');
+            if ($select.length > 0) $select.val($select.find('option:first').val());
+            triggerSearch();
+            $(this).hide();
+        });
+        
+        $form.on('submit', function(e) {
+            e.preventDefault();
+            clearTimeout(timer);
+            triggerSearch();
+        });
+
+        // Intercept pagination clicks within the table container to maintain AJAX flow
+        $container.on('click', '.pagination a', function (e) {
+            e.preventDefault();
+            const url = $(this).attr('href');
+            if (url) {
+                // Parse the searchBy and searchTerm into UI if they exist in URL
+                const urlObj = new URL(url, window.location.origin);
+                if (urlObj.searchParams.has('searchTerm')) {
+                    $input.val(urlObj.searchParams.get('searchTerm'));
+                    $clearBtn.show();
+                }
+                if ($select.length > 0 && urlObj.searchParams.has('searchBy')) {
+                    $select.val(urlObj.searchParams.get('searchBy'));
+                }
+                
+                triggerSearch(url);
+            }
+        });
+    });
+</script>

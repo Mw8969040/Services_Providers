@@ -1,6 +1,6 @@
 @* --- Partial View: Category Card --- *@
 @* بيعرض قسم واحد كـ Card *@
-@model CategoryVM
+@model CategoryDto
 
 <a asp-controller="Service" asp-action="GetByCategory" asp-route-categoryId="@Model.Id"
    class="text-decoration-none">

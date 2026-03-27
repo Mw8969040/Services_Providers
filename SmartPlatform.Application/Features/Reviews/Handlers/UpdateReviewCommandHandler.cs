@@ -17,13 +17,13 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
 
         public async Task Handle(UpdateReviewCommand request, CancellationToken cancellationToken)
         {
-            var review = await _unitOfWork.Repository<Review>().GetByIdWithIncludesAsync(r => r.Id == request.ReviewVM.Id, "ServiceRequest");
+            var review = await _unitOfWork.Repository<Review>().GetByIdWithIncludesAsync(r => r.Id == request.ReviewDto.Id, "ServiceRequest");
 
             if (review == null) throw new Exception("Review not found");
             if (review.ServiceRequest.CustomerId != request.CustomerId) throw new UnauthorizedAccessException();
 
-            review.Rating = request.ReviewVM.Rating;
-            review.Comment = request.ReviewVM.Comment;
+            review.Rating = request.ReviewDto.Rating;
+            review.Comment = request.ReviewDto.Comment;
 
             _unitOfWork.Repository<Review>().Update(review);
             await _unitOfWork.CompleteAsync();

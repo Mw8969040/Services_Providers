@@ -3,5 +3,5 @@ using SmartPlatform.Application.DTOs;
 
 namespace SmartPlatform.Application.Features.Admin.Queries
 {
-    public record GetProvidersQuery() : IRequest<IEnumerable<UserVM>>;
+    public record GetProvidersQuery() : IRequest<IEnumerable<UserDto>>;
 }

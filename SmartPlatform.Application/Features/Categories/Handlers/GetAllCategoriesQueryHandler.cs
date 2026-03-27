@@ -6,7 +6,7 @@ using SmartPlatform.Application.Features.Categories.Queries;
 
 namespace SmartPlatform.Application.Features.Categories.Handlers
 {
-    public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, IPagedList<CategoryVM>>
+    public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, IPagedList<CategoryDto>>
     {
         private readonly IReadDbConnection _readDbConnection;
 
@@ -15,7 +15,7 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
             _readDbConnection = readDbConnection;
         }
 
-        public async Task<IPagedList<CategoryVM>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
+        public async Task<IPagedList<CategoryDto>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
         {
             var offset = (request.PageNumber - 1) * request.PageSize;
 
@@ -31,10 +31,10 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
 
             var parameters = new { Offset = offset, PageSize = request.PageSize };
 
-            var items = await _readDbConnection.QueryAsync<CategoryVM>(itemsSql, parameters);
+            var items = await _readDbConnection.QueryAsync<CategoryDto>(itemsSql, parameters);
             var totalCount = await _readDbConnection.QuerySingleAsync<int>(countSql, parameters);
 
-            return new StaticPagedList<CategoryVM>(items, request.PageNumber, request.PageSize, totalCount);
+            return new StaticPagedList<CategoryDto>(items, request.PageNumber, request.PageSize, totalCount);
         }
     }
 }

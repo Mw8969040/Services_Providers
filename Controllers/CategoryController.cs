@@ -28,12 +28,12 @@ namespace SmartPlatform.Web.Controllers
 
         public IActionResult Create()
         {
-            return PartialView("_CreateEdit", new CategoryVM());
+            return PartialView("_CreateEdit", new CategoryDto());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CategoryVM category)
+        public async Task<IActionResult> Create(CategoryDto category)
         {
             if (!ModelState.IsValid)
             {
@@ -55,7 +55,7 @@ namespace SmartPlatform.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(CategoryVM category)
+        public async Task<IActionResult> Edit(CategoryDto category)
         {
             if (!ModelState.IsValid)
             {

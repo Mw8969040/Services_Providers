@@ -8,6 +8,7 @@ using SmartPlatform.Application.Mapping;
 using SmartPlatform.Application.Common.Interfaces;
 using SmartPlatform.Infrastructure.UOW;
 using SmartPlatform.Application.Features.Services.Queries;
+using MediatR;
 
 namespace SmartPlatform.Web
 {
@@ -34,18 +35,17 @@ namespace SmartPlatform.Web
 
             // MediatR
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetServicesQuery).Assembly));
+            builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(SmartPlatform.Application.Common.Behaviors.CachingBehavior<,>));
 
             // FluentValidation
             builder.Services.AddValidatorsFromAssembly(typeof(GetServicesQuery).Assembly);
 
-            // IMemoryCache
+            // Caching
             builder.Services.AddMemoryCache();
+            builder.Services.AddTransient<ICacheService, SmartPlatform.Infrastructure.Services.MemoryCacheService>();
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews(options =>
-            {
-                options.Filters.Add<Filters.GlobalExceptionFilter>();
-            });
+            builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 
             // Infrastructure Services
@@ -55,6 +55,8 @@ namespace SmartPlatform.Web
             // MediatR Handlers take care of the business logic formerly held in Services.
 
             var app = builder.Build();
+
+            app.UseMiddleware<SmartPlatform.Web.Middlewares.GlobalExceptionMiddleware>();
 
             using (var Scope = app.Services.CreateScope())
             {

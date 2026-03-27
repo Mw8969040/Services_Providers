@@ -1,5 +1,5 @@
 @* --- Service/Details — View service details (Customer) --- *@
-@model ServiceVM
+@model ServiceDto
 @{
     ViewData["Title"] = Model.Title;
 }
@@ -28,7 +28,13 @@
 
                     <div class="sp-details-meta">
                         <span><i class="fas fa-tag"></i> @Model.CategoryName</span>
-                        <span><i class="fas fa-user"></i> @Model.ProviderName</span>
+                        <span>
+                            <i class="fas fa-user-tie"></i> 
+                            <a asp-controller="Profile" asp-action="PublicProfile" asp-route-providerId="@Model.ProviderId" class="text-decoration-none fw-bold">
+                                @Model.ProviderName
+                            </a>
+                            <span class="badge bg-light text-primary border ms-1" style="font-size: 0.7rem;">View Profile</span>
+                        </span>
                         @if (Model.IsAvailable)
                         {
                             <span class="sp-available"><i class="fas fa-check-circle"></i> Available</span>
