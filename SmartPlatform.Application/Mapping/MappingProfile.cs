@@ -9,8 +9,8 @@ namespace SmartPlatform.Application.Mapping
         public MappingProfile()
         {
             CreateMap<Service, ServiceDto>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.ProviderName, opt => opt.MapFrom(src => src.Provider.FullName));
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
+                .ForMember(dest => dest.ProviderName, opt => opt.MapFrom(src => src.Provider != null ? src.Provider.FullName : string.Empty));
 
             CreateMap<ServiceDto, Service>()
                 .ForMember(dest => dest.Category, opt => opt.Ignore())
@@ -24,15 +24,15 @@ namespace SmartPlatform.Application.Mapping
                 .ForMember(dest => dest.Services, opt => opt.Ignore());
 
             CreateMap<ServiceRequest, ServiceRequestDto>()
-                .ForMember(dest => dest.ServiceTitle, opt => opt.MapFrom(src => src.Service.Title))
-                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer.FullName));
+                .ForMember(dest => dest.ServiceTitle, opt => opt.MapFrom(src => src.Service != null ? src.Service.Title : string.Empty))
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.FullName : string.Empty));
 
             CreateMap<ServiceRequestDto, ServiceRequest>()
                 .ForMember(dest => dest.Service, opt => opt.Ignore())
                 .ForMember(dest => dest.Customer, opt => opt.Ignore());
 
             CreateMap<Review, ReviewDto>()
-                .ForMember(dest => dest.ServiceTitle, opt => opt.MapFrom(src => src.ServiceRequest.Service.Title))
+                .ForMember(dest => dest.ServiceTitle, opt => opt.MapFrom(src => src.ServiceRequest != null && src.ServiceRequest.Service != null ? src.ServiceRequest.Service.Title : string.Empty))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.ReviewDate));
 
             CreateMap<ReviewDto, Review>()

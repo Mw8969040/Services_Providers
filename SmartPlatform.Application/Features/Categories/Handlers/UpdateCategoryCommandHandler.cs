@@ -12,11 +12,13 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _env;
+        private readonly ICacheService _cacheService;
 
-        public UpdateCategoryCommandHandler(IUnitOfWork unitOfWork, IWebHostEnvironment env)
+        public UpdateCategoryCommandHandler(IUnitOfWork unitOfWork, IWebHostEnvironment env, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _env = env;
+            _cacheService = cacheService;
         }
 
         public async Task Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
@@ -35,6 +37,10 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
 
             _unitOfWork.Repository<ServiceCategory>().Update(category);
             await _unitOfWork.CompleteAsync();
+
+            // Invalidate Cache
+            await _cacheService.RemoveAsync("Services_List_P1_S10_C0_Prall");
+            await _cacheService.RemoveAsync($"Services_List_P1_S10_C{category.Id}_Prall");
         }
 
         private async Task<string> SaveImageAsync(IFormFile imageFile)

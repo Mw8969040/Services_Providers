@@ -11,11 +11,13 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public CreateReviewCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public CreateReviewCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _cacheService = cacheService;
         }
 
         public async Task Handle(CreateReviewCommand request, CancellationToken cancellationToken)
@@ -37,6 +39,13 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
             var review = _mapper.Map<Review>(request.ReviewDto);
             await _unitOfWork.Repository<Review>().AddAsync(review);
             await _unitOfWork.CompleteAsync();
+
+            // Invalidate Cache
+            await _cacheService.RemoveAsync($"ServiceDetails_{serviceRequest.ServiceId}");
+            await _cacheService.RemoveAsync($"ServiceRequests_List_P1_S10_Prall_Cu{serviceRequest.CustomerId}_Schnone_Bynone");
+            await _cacheService.RemoveAsync($"DashboardStats_{serviceRequest.CustomerId}_Admin_False");
+            await _cacheService.RemoveAsync($"DashboardStats_{serviceRequest.Service.ProviderId}_Admin_False");
+            await _cacheService.RemoveAsync("DashboardStats_Admin_Global");
 
             // Recalculate Provider Rating
             var providerId = serviceRequest.Service.ProviderId;

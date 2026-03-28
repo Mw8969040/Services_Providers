@@ -9,14 +9,21 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
     public class GetServiceRequestsQueryHandler : IRequestHandler<GetServiceRequestsQuery, IPagedList<ServiceRequestDto>>
     {
         private readonly IReadDbConnection _readDbConnection;
+        private readonly ICacheService _cacheService;
 
-        public GetServiceRequestsQueryHandler(IReadDbConnection readDbConnection)
+        public GetServiceRequestsQueryHandler(IReadDbConnection readDbConnection, ICacheService cacheService)
         {
             _readDbConnection = readDbConnection;
+            _cacheService = cacheService;
         }
 
         public async Task<IPagedList<ServiceRequestDto>> Handle(GetServiceRequestsQuery request, CancellationToken cancellationToken)
         {
+            var cacheKey = $"ServiceRequests_List_P{request.PageNumber}_S{request.PageSize}_Pr{request.ProviderId ?? "all"}_Cu{request.CustomerId ?? "all"}_Sch{request.SearchTerm ?? "none"}_By{request.SearchBy ?? "none"}";
+
+            var cachedData = await _cacheService.GetAsync<IPagedList<ServiceRequestDto>>(cacheKey);
+            if (cachedData != null) return cachedData;
+
             var offset = (request.PageNumber - 1) * request.PageSize;
 
             string searchCondition = "";
@@ -76,7 +83,11 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
             var items = await _readDbConnection.QueryAsync<ServiceRequestDto>(itemsSql, parameters);
             var totalCount = await _readDbConnection.QuerySingleAsync<int>(countSql, parameters);
 
-            return new StaticPagedList<ServiceRequestDto>(items, request.PageNumber, request.PageSize, totalCount);
+            var result = new StaticPagedList<ServiceRequestDto>(items, request.PageNumber, request.PageSize, totalCount);
+
+            await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+            return result;
         }
     }
 }

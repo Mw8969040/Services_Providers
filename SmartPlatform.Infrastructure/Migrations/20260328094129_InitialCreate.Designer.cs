@@ -12,7 +12,7 @@ using SmartPlatform.Infrastructure.Data;
 namespace SmartPlatform.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260327194009_InitialCreate")]
+    [Migration("20260328094129_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -351,7 +351,9 @@ namespace SmartPlatform.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ServiceRequestId");
+                    b.HasIndex("ServiceRequestId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Reviews");
                 });

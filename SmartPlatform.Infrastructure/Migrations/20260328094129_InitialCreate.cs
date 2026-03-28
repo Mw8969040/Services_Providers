@@ -378,7 +378,9 @@ namespace SmartPlatform.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_ServiceRequestId",
                 table: "Reviews",
-                column: "ServiceRequestId");
+                column: "ServiceRequestId",
+                unique: true,
+                filter: "[IsDeleted] = 0");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceRequests_CustomerId",

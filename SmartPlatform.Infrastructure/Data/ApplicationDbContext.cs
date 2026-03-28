@@ -47,6 +47,10 @@ namespace SmartPlatform.Infrastructure.Data
             modelBuilder.Entity<ServiceCategory>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<ServiceRequest>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Review>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => r.ServiceRequestId)
+                .IsUnique()
+                .HasFilter("[IsDeleted] = 0");
             modelBuilder.Entity<CustomerProfile>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<ProviderProfile>().HasQueryFilter(e => !e.IsDeleted);
 

@@ -9,10 +9,12 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
     public class UpdateReviewCommandHandler : IRequestHandler<UpdateReviewCommand>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cacheService;
 
-        public UpdateReviewCommandHandler(IUnitOfWork unitOfWork)
+        public UpdateReviewCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
+            _cacheService = cacheService;
         }
 
         public async Task Handle(UpdateReviewCommand request, CancellationToken cancellationToken)
@@ -27,6 +29,12 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
 
             _unitOfWork.Repository<Review>().Update(review);
             await _unitOfWork.CompleteAsync();
+
+            // Invalidate Cache
+            await _cacheService.RemoveAsync($"ServiceDetails_{review.ServiceRequest.ServiceId}");
+            await _cacheService.RemoveAsync($"DashboardStats_{review.ServiceRequest.CustomerId}_Admin_False");
+            await _cacheService.RemoveAsync($"DashboardStats_{review.ServiceRequest.Service.ProviderId}_Admin_False");
+            await _cacheService.RemoveAsync("DashboardStats_Admin_Global");
 
             // Recalculate Provider Rating
             var providerId = review.ServiceRequest.Service.ProviderId;

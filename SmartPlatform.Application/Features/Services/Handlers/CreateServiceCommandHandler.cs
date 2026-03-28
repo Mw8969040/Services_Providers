@@ -14,12 +14,14 @@ namespace SmartPlatform.Application.Features.Services.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
+        private readonly ICacheService _cacheService;
 
-        public CreateServiceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IWebHostEnvironment env)
+        public CreateServiceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IWebHostEnvironment env, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _env = env;
+            _cacheService = cacheService;
         }
 
         public async Task Handle(CreateServiceCommand request, CancellationToken cancellationToken)
@@ -34,6 +36,10 @@ namespace SmartPlatform.Application.Features.Services.Handlers
 
             await _unitOfWork.Repository<Service>().AddAsync(service);
             await _unitOfWork.CompleteAsync();
+
+            // Invalidate Cache (Best effort for list)
+            await _cacheService.RemoveAsync("Services_List_P1_S10_C0_Prall");
+            await _cacheService.RemoveAsync($"Services_List_P1_S10_C0_Pr{service.ProviderId}");
         }
 
         private async Task<string> SaveImageAsync(IFormFile imageFile)

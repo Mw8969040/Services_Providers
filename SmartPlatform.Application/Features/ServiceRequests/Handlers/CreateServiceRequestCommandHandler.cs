@@ -11,11 +11,13 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public CreateServiceRequestCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public CreateServiceRequestCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _cacheService = cacheService;
         }
 
         public async Task Handle(CreateServiceRequestCommand request, CancellationToken cancellationToken)
@@ -58,6 +60,12 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
 
             await _unitOfWork.Repository<ServiceRequest>().AddAsync(serviceRequest);
             await _unitOfWork.CompleteAsync();
+
+            // Invalidate Cache
+            await _cacheService.RemoveAsync($"ServiceDetails_{serviceRequest.ServiceId}");
+            await _cacheService.RemoveAsync($"ServiceRequests_List_P1_S10_Prall_Cu{request.ServiceRequestDto.CustomerId}_Schnone_Bynone");
+            await _cacheService.RemoveAsync($"DashboardStats_{request.ServiceRequestDto.CustomerId}_Admin_False");
+            await _cacheService.RemoveAsync("DashboardStats_Admin_Global");
         }
     }
 }

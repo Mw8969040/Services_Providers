@@ -8,14 +8,23 @@ namespace SmartPlatform.Application.Features.Dashboard.Handlers
     public class GetDashboardStatsQueryHandler : IRequestHandler<GetDashboardStatsQuery, DashboardDataDto>
     {
         private readonly IReadDbConnection _readDbConnection;
+        private readonly ICacheService _cacheService;
 
-        public GetDashboardStatsQueryHandler(IReadDbConnection readDbConnection)
+        public GetDashboardStatsQueryHandler(IReadDbConnection readDbConnection, ICacheService cacheService)
         {
             _readDbConnection = readDbConnection;
+            _cacheService = cacheService;
         }
 
         public async Task<DashboardDataDto> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
         {
+            var cacheKey = request.IsAdmin 
+                ? "DashboardStats_Admin_Global" 
+                : $"DashboardStats_{request.UserId}_Admin_False";
+
+            var cachedData = await _cacheService.GetAsync<DashboardDataDto>(cacheKey);
+            if (cachedData != null) return cachedData;
+
             // 1. تجميع كل الـ Queries في String واحد
             // ملاحظة: الـ @UserId هيمشي عليهم كلهم أوتوماتيك
             string providerFilter = request.IsAdmin ? "" : " AND s.ProviderId = @UserId ";
@@ -68,6 +77,8 @@ namespace SmartPlatform.Application.Features.Dashboard.Handlers
 
                 data.RevenueByMonth = (await multi.ReadAsync<MonthlyStatDto>()).ToList();
                 data.TopServices = (await multi.ReadAsync<TopServiceDto>()).ToList();
+
+                await _cacheService.SetAsync(cacheKey, data, TimeSpan.FromMinutes(5));
 
                 return data;
             }

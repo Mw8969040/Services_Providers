@@ -9,10 +9,12 @@ namespace SmartPlatform.Application.Features.Profiles.Handlers
     public class UpdateCustomerProfileCommandHandler : IRequestHandler<UpdateCustomerProfileCommand, bool>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cacheService;
 
-        public UpdateCustomerProfileCommandHandler(IUnitOfWork unitOfWork)
+        public UpdateCustomerProfileCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
+            _cacheService = cacheService;
         }
 
         public async Task<bool> Handle(UpdateCustomerProfileCommand request, CancellationToken cancellationToken)
@@ -27,7 +29,16 @@ namespace SmartPlatform.Application.Features.Profiles.Handlers
             profile.ProfilePictureUrl = request.Profile.ProfilePictureUrl;
 
             _unitOfWork.Repository<CustomerProfile>().Update(profile);
-            return await _unitOfWork.CompleteAsync() > 0;
+            var result = await _unitOfWork.CompleteAsync() > 0;
+
+            if (result)
+            {
+                // Invalidate Cache
+                await _cacheService.RemoveAsync($"ServiceRequests_List_P1_S10_Prall_Cu{profile.UserId}_Schnone_Bynone");
+                await _cacheService.RemoveAsync($"DashboardStats_{profile.UserId}_Admin_False");
+            }
+
+            return result;
         }
     }
 }

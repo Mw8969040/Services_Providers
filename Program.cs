@@ -35,7 +35,6 @@ namespace SmartPlatform.Web
 
             // MediatR
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetServicesQuery).Assembly));
-            builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(SmartPlatform.Application.Common.Behaviors.CachingBehavior<,>));
 
             // FluentValidation
             builder.Services.AddValidatorsFromAssembly(typeof(GetServicesQuery).Assembly);

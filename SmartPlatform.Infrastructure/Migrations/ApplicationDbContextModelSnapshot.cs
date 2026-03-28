@@ -348,7 +348,9 @@ namespace SmartPlatform.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ServiceRequestId");
+                    b.HasIndex("ServiceRequestId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Reviews");
                 });
