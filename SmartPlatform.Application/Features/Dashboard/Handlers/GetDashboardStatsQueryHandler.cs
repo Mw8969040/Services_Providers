@@ -25,8 +25,6 @@ namespace SmartPlatform.Application.Features.Dashboard.Handlers
             var cachedData = await _cacheService.GetAsync<DashboardDataDto>(cacheKey);
             if (cachedData != null) return cachedData;
 
-            // 1. تجميع كل الـ Queries في String واحد
-            // ملاحظة: الـ @UserId هيمشي عليهم كلهم أوتوماتيك
             string providerFilter = request.IsAdmin ? "" : " AND s.ProviderId = @UserId ";
 
             var combinedSql = $@"
@@ -68,10 +66,8 @@ namespace SmartPlatform.Application.Features.Dashboard.Handlers
         ORDER BY COUNT(sr.Id) DESC;
     ";
 
-            // 2. تنفيذ الاستعلام مرة واحدة فقط باستخدام QueryMultipleAsync
             using (var multi = await _readDbConnection.QueryMultipleAsync(combinedSql, new { UserId = request.UserId }))
             {
-                // قراءة النتائج بالترتيب اللي مكتوب في الـ SQL
                 var stats = await multi.ReadFirstOrDefaultAsync<DashboardDataDto>();
                 var data = stats ?? new DashboardDataDto();
 

@@ -38,9 +38,9 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
             _unitOfWork.Repository<ServiceCategory>().Update(category);
             await _unitOfWork.CompleteAsync();
 
-            // Invalidate Cache
             await _cacheService.RemoveAsync("Services_List_P1_S10_C0_Prall");
             await _cacheService.RemoveAsync($"Services_List_P1_S10_C{category.Id}_Prall");
+            await _cacheService.RemoveGroupAsync("Categories", cancellationToken);
         }
 
         private async Task<string> SaveImageAsync(IFormFile imageFile)

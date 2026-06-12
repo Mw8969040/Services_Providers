@@ -20,14 +20,13 @@ namespace SmartPlatform.Web.Controllers
         [Authorize]
         public async Task<IActionResult> Index()
         {
-            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             
             if (User.IsInRole("Admin"))
             {
                 var customerProfile = await _mediator.Send(new GetCustomerProfileQuery(userId));
                 if (customerProfile != null) return View("CustomerIndex", customerProfile);
                 
-                // Admin has no customer profile — show a simple fallback
                 return View("CustomerIndex", new CustomerProfileDto { UserId = userId, FullName = "Admin" });
             }
 
@@ -36,7 +35,6 @@ namespace SmartPlatform.Web.Controllers
                 var profile = await _mediator.Send(new GetProviderProfileQuery(userId));
                 if (profile == null)
                 {
-                    // Auto-create missing ProviderProfile for existing providers
                     await _mediator.Send(new CreateProviderProfileCommand
                     {
                         UserId = userId,
@@ -53,7 +51,6 @@ namespace SmartPlatform.Web.Controllers
                 var profile = await _mediator.Send(new GetCustomerProfileQuery(userId));
                 if (profile == null)
                 {
-                    // Auto-create missing CustomerProfile
                     await _mediator.Send(new CreateCustomerProfileCommand { UserId = userId });
                     profile = await _mediator.Send(new GetCustomerProfileQuery(userId));
                 }

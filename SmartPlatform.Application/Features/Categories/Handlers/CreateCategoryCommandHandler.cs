@@ -15,12 +15,14 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
+        private readonly ICacheService _cacheService;
 
-        public CreateCategoryCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IWebHostEnvironment env)
+        public CreateCategoryCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IWebHostEnvironment env, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _env = env;
+            _cacheService = cacheService;
         }
 
         public async Task Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
@@ -34,6 +36,8 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
 
             await _unitOfWork.Repository<ServiceCategory>().AddAsync(category);
             await _unitOfWork.CompleteAsync();
+
+            await _cacheService.RemoveGroupAsync("Categories", cancellationToken);
         }
 
         private async Task<string> SaveImageAsync(IFormFile imageFile)

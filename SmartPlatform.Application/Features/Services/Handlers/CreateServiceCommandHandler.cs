@@ -37,9 +37,7 @@ namespace SmartPlatform.Application.Features.Services.Handlers
             await _unitOfWork.Repository<Service>().AddAsync(service);
             await _unitOfWork.CompleteAsync();
 
-            // Invalidate Cache (Best effort for list)
-            await _cacheService.RemoveAsync("Services_List_P1_S10_C0_Prall");
-            await _cacheService.RemoveAsync($"Services_List_P1_S10_C0_Pr{service.ProviderId}");
+            await _cacheService.RemoveGroupAsync("Services");
         }
 
         private async Task<string> SaveImageAsync(IFormFile imageFile)

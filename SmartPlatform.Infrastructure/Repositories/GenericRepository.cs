@@ -25,12 +25,7 @@ namespace SmartPlatform.Infrastructure.Repositories
 
         public async Task<TEntity?> GetByIdAsync(int id)
         {
-            var entity = await _dbSet.FindAsync(id);
-            if (entity != null)
-            {
-                _context.Entry(entity).State = EntityState.Detached;
-            }
-            return entity;
+            return await _dbSet.FindAsync(id);
         }
 
         public async Task AddAsync(TEntity entity)

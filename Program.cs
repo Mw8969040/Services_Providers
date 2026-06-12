@@ -30,30 +30,24 @@ namespace SmartPlatform.Web
                 options.LoginPath = "/Account/Login";
             });
 
-            // AutoMapper
-            builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+            builder.Services.AddAutoMapper(cfg => {
+                cfg.AddMaps(typeof(MappingProfile).Assembly);
+            });
 
-            // MediatR
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetServicesQuery).Assembly));
 
-            // FluentValidation
             builder.Services.AddValidatorsFromAssembly(typeof(GetServicesQuery).Assembly);
 
-            // Caching
             builder.Services.AddMemoryCache();
             builder.Services.AddTransient<ICacheService, SmartPlatform.Infrastructure.Services.MemoryCacheService>();
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 
-            // Infrastructure Services
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IReadDbConnection, ReadDbConnection>();
 
-            // MediatR Handlers take care of the business logic formerly held in Services.
-
-            var app = builder.Build();
+var app = builder.Build();
 
             app.UseMiddleware<SmartPlatform.Web.Middlewares.GlobalExceptionMiddleware>();
 
@@ -65,7 +59,6 @@ namespace SmartPlatform.Web
                 var userManager = ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                 var context = ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                // Ensure DB is created and migrated
                 await context.Database.MigrateAsync();
 
                 await RoleSeeder.SeedRolesAsync(roleManager);

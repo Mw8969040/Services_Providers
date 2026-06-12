@@ -27,7 +27,6 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
             if (serviceRequest == null || serviceRequest.requestStatus != RequestStatus.Completed)
                 throw new Exception("Review can only be added for completed requests");
 
-            // Check if review already exists for this request
             var existingReview = await _unitOfWork.Repository<Review>()
                 .GetByIdWithIncludesAsync(r => r.ServiceRequestId == request.ReviewDto.ServiceRequestId);
 
@@ -40,14 +39,12 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
             await _unitOfWork.Repository<Review>().AddAsync(review);
             await _unitOfWork.CompleteAsync();
 
-            // Invalidate Cache
             await _cacheService.RemoveAsync($"ServiceDetails_{serviceRequest.ServiceId}");
             await _cacheService.RemoveAsync($"ServiceRequests_List_P1_S10_Prall_Cu{serviceRequest.CustomerId}_Schnone_Bynone");
             await _cacheService.RemoveAsync($"DashboardStats_{serviceRequest.CustomerId}_Admin_False");
             await _cacheService.RemoveAsync($"DashboardStats_{serviceRequest.Service.ProviderId}_Admin_False");
             await _cacheService.RemoveAsync("DashboardStats_Admin_Global");
 
-            // Recalculate Provider Rating
             var providerId = serviceRequest.Service.ProviderId;
             var providerReviews = await _unitOfWork.Repository<Review>().GetAllWithIncludesAsync(
                 r => r.ServiceRequest.Service.ProviderId == providerId,

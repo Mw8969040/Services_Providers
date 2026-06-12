@@ -38,7 +38,6 @@ namespace SmartPlatform.Application.DTOs
         public string? ProviderId { get; set; }
         public string? ProviderName { get; set; }
 
-        // Reviews
         public List<ReviewDto>? Reviews { get; set; } = new();
         public double AverageRating { get; set; }
         public bool HasPendingRequest { get; set; }

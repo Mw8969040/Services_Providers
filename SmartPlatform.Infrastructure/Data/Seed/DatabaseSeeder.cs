@@ -17,7 +17,6 @@ namespace SmartPlatform.Infrastructure.Data.Seed
 
             try
             {
-                // 1. Seed Categories
                 var categoryNames = new[] { "Plumbing", "Electrical", "Cleaning" };
                 foreach (var catName in categoryNames)
                 {
@@ -44,7 +43,6 @@ namespace SmartPlatform.Infrastructure.Data.Seed
                 }
                 await context.SaveChangesAsync();
 
-                // 2. Seed Providers (Keep as is since it already checks per email)
                 var providerUsers = new List<ApplicationUser>
                 {
                     new ApplicationUser { UserName = "ahmed@plumber.com", Email = "ahmed@plumber.com", FullName = "Ahmed The Plumber", EmailConfirmed = true, PhoneNumber = "0100000001", IsActive = true },
@@ -68,17 +66,32 @@ namespace SmartPlatform.Infrastructure.Data.Seed
                 var ahmed = providers.FirstOrDefault(u => u.Email == "ahmed@plumber.com");
                 var sara = providers.FirstOrDefault(u => u.Email == "sara@cleaner.com");
 
-                if (ahmed != null && !await context.ProviderProfiles.AnyAsync(p => p.UserId == ahmed.Id))
+                if (ahmed != null)
                 {
-                    await context.ProviderProfiles.AddAsync(new ProviderProfile { UserId = ahmed.Id, ProviderName = "Ahmed", BusinessName = "Plumbing Masters", Description = "Expert pipe fixing.", YearsOfExperience = 10, Rating = 4.8, ProfilePictureUrl = "https://i.pravatar.cc/150?u=ahmed" });
+                    var profile = await context.ProviderProfiles.FirstOrDefaultAsync(p => p.UserId == ahmed.Id);
+                    if (profile == null)
+                    {
+                        await context.ProviderProfiles.AddAsync(new ProviderProfile { UserId = ahmed.Id, ProviderName = "Ahmed", BusinessName = "Plumbing Masters", Description = "Expert pipe fixing.", YearsOfExperience = 10, Rating = 4.8, ProfilePictureUrl = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150" });
+                    }
+                    else
+                    {
+                        profile.ProfilePictureUrl = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150";
+                    }
                 }
-                if (sara != null && !await context.ProviderProfiles.AnyAsync(p => p.UserId == sara.Id))
+                if (sara != null)
                 {
-                    await context.ProviderProfiles.AddAsync(new ProviderProfile { UserId = sara.Id, ProviderName = "Sara", BusinessName = "Sparkle Clean", Description = "Best cleaning in town.", YearsOfExperience = 5, Rating = 4.9, ProfilePictureUrl = "https://i.pravatar.cc/150?u=sara" });
+                    var profile = await context.ProviderProfiles.FirstOrDefaultAsync(p => p.UserId == sara.Id);
+                    if (profile == null)
+                    {
+                        await context.ProviderProfiles.AddAsync(new ProviderProfile { UserId = sara.Id, ProviderName = "Sara", BusinessName = "Sparkle Clean", Description = "Best cleaning in town.", YearsOfExperience = 5, Rating = 4.9, ProfilePictureUrl = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150" });
+                    }
+                    else
+                    {
+                        profile.ProfilePictureUrl = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150";
+                    }
                 }
                 await context.SaveChangesAsync();
 
-                // 3. Seed Customers (Keep as is)
                 var customerUsers = new List<ApplicationUser>
                 {
                     new ApplicationUser { UserName = "omar@customer.com", Email = "omar@customer.com", FullName = "Omar Customer", EmailConfirmed = true, PhoneNumber = "0111111111", IsActive = true },
@@ -102,17 +115,32 @@ namespace SmartPlatform.Infrastructure.Data.Seed
                 var omar = customers.FirstOrDefault(u => u.Email == "omar@customer.com");
                 var nada = customers.FirstOrDefault(u => u.Email == "nada@customer.com");
 
-                if (omar != null && !await context.CustomerProfiles.AnyAsync(p => p.UserId == omar.Id))
+                if (omar != null)
                 {
-                    await context.CustomerProfiles.AddAsync(new CustomerProfile { UserId = omar.Id, FullName = "Omar Khaled", Address = "Cairo, Maadi", ProfilePictureUrl = "https://i.pravatar.cc/150?u=omar" });
+                    var profile = await context.CustomerProfiles.FirstOrDefaultAsync(p => p.UserId == omar.Id);
+                    if (profile == null)
+                    {
+                        await context.CustomerProfiles.AddAsync(new CustomerProfile { UserId = omar.Id, FullName = "Omar Khaled", Address = "Cairo, Maadi", ProfilePictureUrl = "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=150" });
+                    }
+                    else
+                    {
+                        profile.ProfilePictureUrl = "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=150";
+                    }
                 }
-                if (nada != null && !await context.CustomerProfiles.AnyAsync(p => p.UserId == nada.Id))
+                if (nada != null)
                 {
-                    await context.CustomerProfiles.AddAsync(new CustomerProfile { UserId = nada.Id, FullName = "Nada Ali", Address = "Giza, Dokki", ProfilePictureUrl = "https://i.pravatar.cc/150?u=nada" });
+                    var profile = await context.CustomerProfiles.FirstOrDefaultAsync(p => p.UserId == nada.Id);
+                    if (profile == null)
+                    {
+                        await context.CustomerProfiles.AddAsync(new CustomerProfile { UserId = nada.Id, FullName = "Nada Ali", Address = "Giza, Dokki", ProfilePictureUrl = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150" });
+                    }
+                    else
+                    {
+                        profile.ProfilePictureUrl = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150";
+                    }
                 }
                 await context.SaveChangesAsync();
 
-                // 4. Seed Services (Check per title)
                 if (ahmed != null && sara != null)
                 {
                     var plumbingCat = await context.ServiceCategories.FirstOrDefaultAsync(c => c.Name == "Plumbing");
@@ -139,7 +167,6 @@ namespace SmartPlatform.Infrastructure.Data.Seed
                     }
                 }
 
-                // 5. Seed Service Requests & Reviews (Check for a specific request)
                 if (omar != null && ahmed != null)
                 {
                     var sinkService = await context.Services.FirstOrDefaultAsync(s => s.Title == "Sink Repair");
@@ -161,7 +188,6 @@ namespace SmartPlatform.Infrastructure.Data.Seed
                         await context.ServiceRequests.AddAsync(request);
                         await context.SaveChangesAsync();
 
-                        // Add Review
                         var review = new Review
                         {
                             ServiceRequestId = request.Id,

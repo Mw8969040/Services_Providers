@@ -43,10 +43,8 @@ namespace SmartPlatform.Application.Features.Services.Handlers
             _unitOfWork.Repository<Service>().Update(service);
             await _unitOfWork.CompleteAsync();
 
+            await _cacheService.RemoveGroupAsync("Services");
             await _cacheService.RemoveAsync($"ServiceDetails_{request.Id}");
-            await _cacheService.RemoveAsync("DashboardStats_Admin_Global");
-            await _cacheService.RemoveAsync($"DashboardStats_{request.ProviderId}_Admin_False");
-            await _cacheService.RemoveAsync("Services_List_P1_S10_Call_Prall");
         }
 
         private async Task<string> SaveImageAsync(IFormFile imageFile)

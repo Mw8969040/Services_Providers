@@ -28,7 +28,6 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
             var customerProfile = await _unitOfWork.Repository<CustomerProfile>()
                 .GetByIdWithIncludesAsync(cp => cp.UserId == request.ServiceRequestDto.CustomerId, "User");
 
-            // Check for existing active requests (Pending or Accepted)
             var existingRequest = await _unitOfWork.Repository<ServiceRequest>()
                 .GetByIdWithIncludesAsync(sr => 
                     sr.ServiceId == request.ServiceRequestDto.ServiceId && 
@@ -47,7 +46,6 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
             serviceRequest.requestStatus = RequestStatus.Pending;
             serviceRequest.TotalPrice = service.BasePrice;
 
-            // Optional: Auto-fill customer info from profile if not provided in DTO
             if (string.IsNullOrEmpty(serviceRequest.CustomerPhoneNumber) && customerProfile?.User != null)
             {
                 serviceRequest.CustomerPhoneNumber = customerProfile.User.PhoneNumber;
@@ -61,7 +59,6 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
             await _unitOfWork.Repository<ServiceRequest>().AddAsync(serviceRequest);
             await _unitOfWork.CompleteAsync();
 
-            // Invalidate Cache
             await _cacheService.RemoveAsync($"ServiceDetails_{serviceRequest.ServiceId}");
             await _cacheService.RemoveAsync($"ServiceRequests_List_P1_S10_Prall_Cu{request.ServiceRequestDto.CustomerId}_Schnone_Bynone");
             await _cacheService.RemoveAsync($"DashboardStats_{request.ServiceRequestDto.CustomerId}_Admin_False");

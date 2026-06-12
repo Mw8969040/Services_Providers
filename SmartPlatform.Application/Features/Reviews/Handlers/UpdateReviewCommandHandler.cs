@@ -30,13 +30,11 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
             _unitOfWork.Repository<Review>().Update(review);
             await _unitOfWork.CompleteAsync();
 
-            // Invalidate Cache
             await _cacheService.RemoveAsync($"ServiceDetails_{review.ServiceRequest.ServiceId}");
             await _cacheService.RemoveAsync($"DashboardStats_{review.ServiceRequest.CustomerId}_Admin_False");
             await _cacheService.RemoveAsync($"DashboardStats_{review.ServiceRequest.Service.ProviderId}_Admin_False");
             await _cacheService.RemoveAsync("DashboardStats_Admin_Global");
 
-            // Recalculate Provider Rating
             var providerId = review.ServiceRequest.Service.ProviderId;
             var providerReviews = await _unitOfWork.Repository<Review>().GetAllWithIncludesAsync(
                 r => r.ServiceRequest.Service.ProviderId == providerId,

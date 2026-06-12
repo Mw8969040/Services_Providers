@@ -9,32 +9,45 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
     public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, IPagedList<CategoryDto>>
     {
         private readonly IReadDbConnection _readDbConnection;
+        private readonly ICacheService _cacheService;
 
-        public GetAllCategoriesQueryHandler(IReadDbConnection readDbConnection)
+        public GetAllCategoriesQueryHandler(IReadDbConnection readDbConnection, ICacheService cacheService)
         {
             _readDbConnection = readDbConnection;
+            _cacheService = cacheService;
         }
 
         public async Task<IPagedList<CategoryDto>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
         {
-            var offset = (request.PageNumber - 1) * request.PageSize;
+            var cacheKey = $"Categories_List_P{request.PageNumber}_S{request.PageSize}";
 
-            var itemsSql = @"
-                SELECT c.Id, c.Name, c.Description, c.ImageUrl,
-                       (SELECT COUNT(*) FROM Services s WHERE s.CategoryId = c.Id AND s.IsDeleted = 0) as ServicesCount
-                FROM ServiceCategories c
-                WHERE c.IsDeleted = 0
-                ORDER BY c.Id
-                OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
+            return await _cacheService.GetOrCreateAsync<IPagedList<CategoryDto>>(
+                key: cacheKey,
+                factory: async ct =>
+                {
+                    var offset = (request.PageNumber - 1) * request.PageSize;
 
-            var countSql = @"SELECT COUNT(*) FROM ServiceCategories WHERE IsDeleted = 0;";
+                    var itemsSql = @"
+                        SELECT c.Id, c.Name, c.Description, c.ImageUrl,
+                               (SELECT COUNT(*) FROM Services s WHERE s.CategoryId = c.Id AND s.IsDeleted = 0) as ServicesCount
+                        FROM ServiceCategories c
+                        WHERE c.IsDeleted = 0
+                        ORDER BY c.Id
+                        OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
 
-            var parameters = new { Offset = offset, PageSize = request.PageSize };
+                    var countSql = @"SELECT COUNT(*) FROM ServiceCategories WHERE IsDeleted = 0;";
 
-            var items = await _readDbConnection.QueryAsync<CategoryDto>(itemsSql, parameters);
-            var totalCount = await _readDbConnection.QuerySingleAsync<int>(countSql, parameters);
+                    var parameters = new { Offset = offset, PageSize = request.PageSize };
 
-            return new StaticPagedList<CategoryDto>(items, request.PageNumber, request.PageSize, totalCount);
+                    var items = await _readDbConnection.QueryAsync<CategoryDto>(itemsSql, parameters);
+                    var totalCount = await _readDbConnection.QuerySingleAsync<int>(countSql, parameters);
+
+                    return new StaticPagedList<CategoryDto>(items, request.PageNumber, request.PageSize, totalCount);
+                },
+                absoluteExpiration: TimeSpan.FromHours(12),
+                group: "Categories",
+                slidingExpiration: TimeSpan.FromHours(2),
+                cancellationToken: cancellationToken);
         }
     }
 }

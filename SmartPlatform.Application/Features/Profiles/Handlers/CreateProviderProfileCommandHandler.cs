@@ -23,7 +23,7 @@ namespace SmartPlatform.Application.Features.Profiles.Handlers
                 ProviderName = request.ProviderName,
                 Description = request.Description,
                 ProfilePictureUrl = request.ProfilePictureUrl,
-                Rating = 0, // Initial rating
+                Rating = 0,
                 YearsOfExperience = request.YearsOfExperience
             };
 

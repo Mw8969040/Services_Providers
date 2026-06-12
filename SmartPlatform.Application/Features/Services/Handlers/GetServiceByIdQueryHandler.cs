@@ -1,9 +1,7 @@
 using MediatR;
-using AutoMapper;
 using SmartPlatform.Application.Common.Interfaces;
 using SmartPlatform.Application.Features.Services.Queries;
 using SmartPlatform.Application.DTOs;
-using SmartPlatform.Domain.Entities;
 
 namespace SmartPlatform.Application.Features.Services.Handlers
 {
@@ -21,59 +19,60 @@ namespace SmartPlatform.Application.Features.Services.Handlers
         public async Task<ServiceDto?> Handle(GetServiceByIdQuery request, CancellationToken cancellationToken)
         {
             var cacheKey = $"ServiceDetails_{request.Id}";
-            
-            // 1. Try get from cache
-            var serviceDto = await _cacheService.GetAsync<ServiceDto>(cacheKey);
 
-            if (serviceDto == null)
-            {
-                // 2. Fetch general data from DB if not in cache
-                var sql = @"
-                    SELECT s.Id, s.Title, s.Description, s.BasePrice, s.ImageUrl, s.IsAvailable, s.CategoryId, s.ProviderId,
-                           c.Name as CategoryName, u.FullName as ProviderName
-                    FROM Services s
-                    LEFT JOIN ServiceCategories c ON s.CategoryId = c.Id
-                    LEFT JOIN AspNetUsers u ON s.ProviderId = u.Id
-                    WHERE s.Id = @Id AND s.IsDeleted = 0";
-
-                serviceDto = await _readDbConnection.QueryFirstOrDefaultAsync<ServiceDto>(sql, new { Id = request.Id });
-
-                if (serviceDto != null)
+            var serviceDto = await _cacheService.GetOrCreateAsync<ServiceDto?>(
+                key: cacheKey,
+                factory: async ct =>
                 {
+                    var sql = @"
+                        SELECT s.Id, s.Title, s.Description, s.BasePrice, s.ImageUrl,
+                               s.IsAvailable, s.CategoryId, s.ProviderId,
+                               c.Name     AS CategoryName,
+                               u.FullName AS ProviderName
+                        FROM   Services s
+                        LEFT JOIN ServiceCategories c ON s.CategoryId = c.Id
+                        LEFT JOIN AspNetUsers       u ON s.ProviderId  = u.Id
+                        WHERE  s.Id = @Id AND s.IsDeleted = 0";
+
+                    var dto = await _readDbConnection.QueryFirstOrDefaultAsync<ServiceDto>(sql, new { Id = request.Id });
+                    if (dto is null) return null;
+
                     var reviewsSql = @"
-                        SELECT r.Id, r.Rating, r.Comment, r.ReviewDate as CreatedAt, r.ServiceRequestId,
-                               u.FullName as CustomerName, u.Id as CustomerId
-                        FROM Reviews r
+                        SELECT r.Id, r.Rating, r.Comment, r.ReviewDate AS CreatedAt,
+                               r.ServiceRequestId,
+                               u.FullName AS CustomerName,
+                               u.Id       AS CustomerId
+                        FROM   Reviews r
                         INNER JOIN ServiceRequests sr ON r.ServiceRequestId = sr.Id
-                        INNER JOIN AspNetUsers u ON sr.CustomerId = u.Id
-                        WHERE sr.ServiceId = @ServiceId AND r.IsDeleted = 0";
+                        INNER JOIN AspNetUsers      u ON sr.CustomerId       = u.Id
+                        WHERE  sr.ServiceId = @ServiceId AND r.IsDeleted = 0";
 
                     var reviews = await _readDbConnection.QueryAsync<ReviewDto>(reviewsSql, new { ServiceId = request.Id });
-                    serviceDto.Reviews = reviews.ToList();
-                    
-                    if (serviceDto.Reviews.Any())
-                    {
-                        serviceDto.AverageRating = serviceDto.Reviews.Average(r => r.Rating);
-                    }
+                    dto.Reviews = reviews.ToList();
 
-                    // 3. Store in cache (expire in 10 minutes)
-                    await _cacheService.SetAsync(cacheKey, serviceDto, TimeSpan.FromMinutes(10));
-                }
-            }
+                    if (dto.Reviews.Count > 0)
+                        dto.AverageRating = dto.Reviews.Average(r => r.Rating);
 
-            // 4. Fetch customer-specific data (NOT cached in the general key)
-            if (serviceDto != null && !string.IsNullOrEmpty(request.CustomerId))
+                    return dto;
+                },
+                absoluteExpiration: TimeSpan.FromMinutes(10),
+                group: "ServiceDetails",
+                slidingExpiration: TimeSpan.FromMinutes(2),
+                cancellationToken: cancellationToken);
+
+            if (serviceDto is not null && !string.IsNullOrEmpty(request.CustomerId))
             {
-                var pendingRequestSql = @"
+                var pendingSql = @"
                     SELECT CASE WHEN EXISTS (
-                        SELECT 1 FROM ServiceRequests sr 
-                        WHERE sr.ServiceId = @ServiceId 
-                        AND sr.CustomerId = @CustomerId 
-                        AND sr.RequestStatus = 0 -- Pending
-                        AND sr.IsDeleted = 0
+                        SELECT 1 FROM ServiceRequests sr
+                        WHERE  sr.ServiceId     = @ServiceId
+                          AND  sr.CustomerId    = @CustomerId
+                          AND  sr.RequestStatus = 0  -- Pending
+                          AND  sr.IsDeleted     = 0
                     ) THEN 1 ELSE 0 END";
 
-                serviceDto.HasPendingRequest = await _readDbConnection.QueryFirstOrDefaultAsync<bool>(pendingRequestSql, new { ServiceId = request.Id, CustomerId = request.CustomerId });
+                serviceDto.HasPendingRequest = await _readDbConnection
+                    .QueryFirstOrDefaultAsync<bool>(pendingSql, new { ServiceId = request.Id, CustomerId = request.CustomerId });
             }
 
             return serviceDto;

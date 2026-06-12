@@ -26,14 +26,13 @@ namespace SmartPlatform.Application.Features.Admin.Handlers
             {
                 await _userManager.AddToRoleAsync(user, "Provider");
                 
-                // Automatically provision ProviderProfile for the new Provider
                 var existingProfile = await _unitOfWork.Repository<ProviderProfile>().GetByIdWithIncludesAsync(p => p.UserId == user.Id);
                 if (existingProfile == null)
                 {
                     await _unitOfWork.Repository<ProviderProfile>().AddAsync(new ProviderProfile 
                     { 
                         UserId = user.Id,
-                        BusinessName = "General Service", // Default Specialty
+                        BusinessName = "General Service",
                         ProviderName = user.FullName,
                         ProfilePictureUrl = null,
                         Description = "Professional service provider on Smart Platform",

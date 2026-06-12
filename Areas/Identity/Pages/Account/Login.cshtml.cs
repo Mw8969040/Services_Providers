@@ -49,7 +49,6 @@ namespace SmartPlatform.Web.Areas.Identity.Pages.Account
 
             returnUrl ??= Url.Content("~/");
 
-            // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ReturnUrl = returnUrl;
@@ -80,7 +79,6 @@ namespace SmartPlatform.Web.Areas.Identity.Pages.Account
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
     }

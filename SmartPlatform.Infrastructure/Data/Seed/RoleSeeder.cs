@@ -18,5 +18,3 @@ namespace SmartPlatform.Infrastructure.Data.Seed
         }
     }
 
-
-

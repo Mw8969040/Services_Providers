@@ -28,14 +28,12 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
             _unitOfWork.Repository<Review>().Delete(review);
             await _unitOfWork.CompleteAsync();
 
-            // Invalidate Cache
             await _cacheService.RemoveAsync($"ServiceDetails_{review.ServiceRequest.ServiceId}");
             await _cacheService.RemoveAsync($"DashboardStats_{review.ServiceRequest.CustomerId}_Admin_False");
             await _cacheService.RemoveAsync($"DashboardStats_{providerId}_Admin_False");
             await _cacheService.RemoveAsync("DashboardStats_Admin_Global");
             await _cacheService.RemoveAsync($"ServiceRequests_List_P1_S10_Prall_Cu{review.ServiceRequest.CustomerId}_Schnone_Bynone");
 
-            // Recalculate Provider Rating
             var providerReviews = await _unitOfWork.Repository<Review>().GetAllWithIncludesAsync(
                 r => r.ServiceRequest.Service.ProviderId == providerId,
                 "ServiceRequest.Service"

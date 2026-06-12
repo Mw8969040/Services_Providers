@@ -49,9 +49,7 @@ namespace SmartPlatform.Web.Areas.Identity.Pages.Account
             [Display(Name = "Phone Number")]
             public string PhoneNumber { get; set; }
 
-
-
-            [Required]
+[Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
@@ -89,11 +87,9 @@ namespace SmartPlatform.Web.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    // Assign role
                     await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                     await _userManager.AddToRoleAsync(user, "Customer");
 
-                    // Create Customer Profile
                     await _mediator.Send(new CreateCustomerProfileCommand
                     {
                         UserId = user.Id,
@@ -110,7 +106,6 @@ namespace SmartPlatform.Web.Areas.Identity.Pages.Account
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
     }

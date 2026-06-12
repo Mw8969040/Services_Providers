@@ -44,7 +44,7 @@ namespace SmartPlatform.Application.Mapping
                 .ForMember(dest => dest.Requests, opt => opt.Ignore())
                 .ForMember(dest => dest.CustomerProfile, opt => opt.Ignore())
                 .ForMember(dest => dest.ProviderProfile, opt => opt.Ignore())
-                .ForMember(dest => dest.Id, opt => opt.Ignore()); // Usually don't map Id back
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
 
             CreateMap<CustomerProfile, CustomerProfileDto>();
             CreateMap<CustomerProfileDto, CustomerProfile>()

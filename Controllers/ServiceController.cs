@@ -7,7 +7,6 @@ using SmartPlatform.Application.Features.Categories.Queries;
 using SmartPlatform.Application.Features.Services.Commands;
 using SmartPlatform.Application.Features.Services.Queries;
 
-
 namespace SmartPlatform.Web.Controllers
 {
 
@@ -21,8 +20,7 @@ namespace SmartPlatform.Web.Controllers
             _mediator = mediator;
         }
 
-
-        public async Task<IActionResult> Index(int? page)
+public async Task<IActionResult> Index(int? page)
         {
             int pageNumber = page ?? 1;
             int pageSize = 6;

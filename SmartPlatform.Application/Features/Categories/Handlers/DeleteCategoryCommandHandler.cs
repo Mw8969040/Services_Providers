@@ -8,10 +8,12 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
     public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cacheService;
 
-        public DeleteCategoryCommandHandler(IUnitOfWork unitOfWork)
+        public DeleteCategoryCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
+            _cacheService = cacheService;
         }
 
         public async Task Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
@@ -22,6 +24,8 @@ namespace SmartPlatform.Application.Features.Categories.Handlers
 
             _unitOfWork.Repository<ServiceCategory>().Delete(category);
             await _unitOfWork.CompleteAsync();
+
+            await _cacheService.RemoveGroupAsync("Categories", cancellationToken);
         }
     }
 }

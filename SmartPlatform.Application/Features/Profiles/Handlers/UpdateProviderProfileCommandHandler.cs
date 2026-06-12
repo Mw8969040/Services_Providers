@@ -34,7 +34,6 @@ namespace SmartPlatform.Application.Features.Profiles.Handlers
 
             if (result)
             {
-                // Invalidate Cache
                 await _cacheService.RemoveAsync("Services_List_P1_S10_C0_Prall");
                 await _cacheService.RemoveAsync($"Services_List_P1_S10_C0_Pr{profile.UserId}");
                 await _cacheService.RemoveAsync($"DashboardStats_{profile.UserId}_Admin_False");
