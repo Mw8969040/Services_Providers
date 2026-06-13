@@ -42,6 +42,7 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
             await _unitOfWork.CompleteAsync();
 
             await _cacheService.RemoveAsync($"ServiceDetails_{review.ServiceRequest.ServiceId}", cancellationToken);
+            await _cacheService.RemoveGroupAsync($"Reviews_Service_{review.ServiceRequest.ServiceId}", cancellationToken);
             await _cacheService.RemoveGroupAsync("DashboardStats", cancellationToken);
 
             var providerId = review.ServiceRequest.Service!.ProviderId;
