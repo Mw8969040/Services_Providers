@@ -74,7 +74,7 @@ namespace SmartPlatform.Application.Features.Dashboard.Handlers
                 data.RevenueByMonth = (await multi.ReadAsync<MonthlyStatDto>()).ToList();
                 data.TopServices = (await multi.ReadAsync<TopServiceDto>()).ToList();
 
-                await _cacheService.SetAsync(cacheKey, data, TimeSpan.FromMinutes(5));
+                await _cacheService.SetAsync(cacheKey, data, TimeSpan.FromMinutes(5), group: "DashboardStats", cancellationToken: cancellationToken);
 
                 return data;
             }

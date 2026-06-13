@@ -9,48 +9,58 @@ namespace SmartPlatform.Application.Features.Reviews.Handlers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICacheService _cacheService;
+        private readonly IReadDbConnection _readDbConnection;
 
-        public DeleteReviewCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
+        public DeleteReviewCommandHandler(
+            IUnitOfWork unitOfWork, 
+            ICacheService cacheService,
+            IReadDbConnection readDbConnection)
         {
             _unitOfWork = unitOfWork;
             _cacheService = cacheService;
+            _readDbConnection = readDbConnection;
         }
 
         public async Task Handle(DeleteReviewCommand request, CancellationToken cancellationToken)
         {
-            var review = await _unitOfWork.Repository<Review>().GetByIdWithIncludesAsync(r => r.Id == request.Id, "ServiceRequest.Service");
+            var review = await _unitOfWork.Repository<Review>().GetByIdWithIncludesAsync(
+                r => r.Id == request.Id, 
+                "ServiceRequest.Service"
+            );
 
-            if (review == null) throw new Exception("Review not found");
-            if (review.ServiceRequest.CustomerId != request.CustomerId) throw new UnauthorizedAccessException();
+            if (review == null) 
+                throw new KeyNotFoundException("Review not found.");
+                
+            if (review.ServiceRequest!.CustomerId != request.CustomerId) 
+                throw new UnauthorizedAccessException("You are not authorized to delete this review.");
 
-            var providerId = review.ServiceRequest.Service.ProviderId;
+            var providerId = review.ServiceRequest.Service!.ProviderId;
 
             _unitOfWork.Repository<Review>().Delete(review);
             await _unitOfWork.CompleteAsync();
 
-            await _cacheService.RemoveAsync($"ServiceDetails_{review.ServiceRequest.ServiceId}");
-            await _cacheService.RemoveAsync($"DashboardStats_{review.ServiceRequest.CustomerId}_Admin_False");
-            await _cacheService.RemoveAsync($"DashboardStats_{providerId}_Admin_False");
-            await _cacheService.RemoveAsync("DashboardStats_Admin_Global");
-            await _cacheService.RemoveAsync($"ServiceRequests_List_P1_S10_Prall_Cu{review.ServiceRequest.CustomerId}_Schnone_Bynone");
+            await _cacheService.RemoveAsync($"ServiceDetails_{review.ServiceRequest.ServiceId}", cancellationToken);
+            await _cacheService.RemoveGroupAsync("ServiceRequests", cancellationToken);
+            await _cacheService.RemoveGroupAsync("DashboardStats", cancellationToken);
 
-            var providerReviews = await _unitOfWork.Repository<Review>().GetAllWithIncludesAsync(
-                r => r.ServiceRequest.Service.ProviderId == providerId,
-                "ServiceRequest.Service"
+            var averageRatingSql = @"
+                SELECT AVG(CAST(r.Rating AS FLOAT))
+                FROM Reviews r
+                INNER JOIN ServiceRequests sr ON r.ServiceRequestId = sr.Id
+                INNER JOIN Services s ON sr.ServiceId = s.Id
+                WHERE s.ProviderId = @ProviderId AND r.IsDeleted = 0";
+
+            var averageRating = await _readDbConnection.QueryFirstOrDefaultAsync<double?>(
+                averageRatingSql, 
+                new { ProviderId = providerId }
             );
-
-            double averageRating = 0;
-            if (providerReviews.Any())
-            {
-                averageRating = providerReviews.Average(r => r.Rating);
-            }
 
             var profiles = await _unitOfWork.Repository<ProviderProfile>().GetAllWithIncludesAsync(p => p.UserId == providerId);
             var profile = profiles.FirstOrDefault();
 
             if (profile != null)
             {
-                profile.Rating = averageRating;
+                profile.Rating = averageRating ?? 0;
                 _unitOfWork.Repository<ProviderProfile>().Update(profile);
                 await _unitOfWork.CompleteAsync();
             }

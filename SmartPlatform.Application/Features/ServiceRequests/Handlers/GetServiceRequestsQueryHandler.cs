@@ -85,7 +85,7 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
 
             var result = new StaticPagedList<ServiceRequestDto>(items, request.PageNumber, request.PageSize, totalCount);
 
-            await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+            await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5), group: "ServiceRequests", cancellationToken: cancellationToken);
 
             return result;
         }
