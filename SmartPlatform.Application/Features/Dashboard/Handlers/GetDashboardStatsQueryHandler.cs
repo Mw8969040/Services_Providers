@@ -22,62 +22,66 @@ namespace SmartPlatform.Application.Features.Dashboard.Handlers
                 ? "DashboardStats_Admin_Global" 
                 : $"DashboardStats_{request.UserId}_Admin_False";
 
-            var cachedData = await _cacheService.GetAsync<DashboardDataDto>(cacheKey);
-            if (cachedData != null) return cachedData;
+            return await _cacheService.GetOrCreateAsync<DashboardDataDto>(
+                key: cacheKey,
+                factory: async ct =>
+                {
+                    string providerFilter = request.IsAdmin ? "" : " AND s.ProviderId = @UserId ";
 
-            string providerFilter = request.IsAdmin ? "" : " AND s.ProviderId = @UserId ";
+                    var combinedSql = $@"
+                        -- 1. Get Top-level Stats
+                        SELECT 
+                            COUNT(sr.Id) as TotalRequests,
+                            SUM(CASE WHEN sr.RequestStatus = 0 THEN 1 ELSE 0 END) as PendingRequests,
+                            SUM(CASE WHEN sr.RequestStatus = 3 THEN 1 ELSE 0 END) as CompletedRequests,
+                            ISNULL(SUM(CASE WHEN sr.RequestStatus = 3 THEN sr.TotalPrice ELSE 0 END), 0) as TotalRevenue
+                        FROM ServiceRequests sr
+                        INNER JOIN Services s ON sr.ServiceId = s.Id
+                        WHERE sr.IsDeleted = 0 {providerFilter};
 
-            var combinedSql = $@"
-        -- 1. Get Top-level Stats
-        SELECT 
-            COUNT(sr.Id) as TotalRequests,
-            SUM(CASE WHEN sr.RequestStatus = 0 THEN 1 ELSE 0 END) as PendingRequests,
-            SUM(CASE WHEN sr.RequestStatus = 3 THEN 1 ELSE 0 END) as CompletedRequests,
-            ISNULL(SUM(CASE WHEN sr.RequestStatus = 3 THEN sr.TotalPrice ELSE 0 END), 0) as TotalRevenue
-        FROM ServiceRequests sr
-        INNER JOIN Services s ON sr.ServiceId = s.Id
-        WHERE sr.IsDeleted = 0 {providerFilter};
+                        -- 2. Get Revenue By Month
+                        SELECT 
+                            DATENAME(month, sr.RequestDate) as Month,
+                            MONTH(sr.RequestDate) as MonthNumber,
+                            ISNULL(SUM(sr.TotalPrice), 0) as Revenue,
+                            COUNT(sr.Id) as RequestCount
+                        FROM ServiceRequests sr
+                        INNER JOIN Services s ON sr.ServiceId = s.Id
+                        WHERE sr.IsDeleted = 0 
+                          AND sr.RequestStatus = 3 
+                          AND YEAR(sr.RequestDate) = YEAR(GETDATE())
+                          {providerFilter}
+                        GROUP BY DATENAME(month, sr.RequestDate), MONTH(sr.RequestDate)
+                        ORDER BY MONTH(sr.RequestDate);
 
-        -- 2. Get Revenue By Month
-        SELECT 
-            DATENAME(month, sr.RequestDate) as Month,
-            MONTH(sr.RequestDate) as MonthNumber,
-            ISNULL(SUM(sr.TotalPrice), 0) as Revenue,
-            COUNT(sr.Id) as RequestCount
-        FROM ServiceRequests sr
-        INNER JOIN Services s ON sr.ServiceId = s.Id
-        WHERE sr.IsDeleted = 0 
-          AND sr.RequestStatus = 3 
-          AND YEAR(sr.RequestDate) = YEAR(GETDATE())
-          {providerFilter}
-        GROUP BY DATENAME(month, sr.RequestDate), MONTH(sr.RequestDate)
-        ORDER BY MONTH(sr.RequestDate);
+                        -- 3. Get Top Selling Services
+                        SELECT TOP 5
+                            s.Title as ServiceName,
+                            COUNT(sr.Id) as SalesCount
+                        FROM ServiceRequests sr
+                        INNER JOIN Services s ON sr.ServiceId = s.Id
+                        WHERE sr.IsDeleted = 0 
+                          AND sr.RequestStatus = 3
+                          {providerFilter}
+                        GROUP BY s.Title
+                        ORDER BY COUNT(sr.Id) DESC;
+                    ";
 
-        -- 3. Get Top Selling Services
-        SELECT TOP 5
-            s.Title as ServiceName,
-            COUNT(sr.Id) as SalesCount
-        FROM ServiceRequests sr
-        INNER JOIN Services s ON sr.ServiceId = s.Id
-        WHERE sr.IsDeleted = 0 
-          AND sr.RequestStatus = 3
-          {providerFilter}
-        GROUP BY s.Title
-        ORDER BY COUNT(sr.Id) DESC;
-    ";
+                    using (var multi = await _readDbConnection.QueryMultipleAsync(combinedSql, new { UserId = request.UserId }))
+                    {
+                        var stats = await multi.ReadFirstOrDefaultAsync<DashboardDataDto>();
+                        var data = stats ?? new DashboardDataDto();
 
-            using (var multi = await _readDbConnection.QueryMultipleAsync(combinedSql, new { UserId = request.UserId }))
-            {
-                var stats = await multi.ReadFirstOrDefaultAsync<DashboardDataDto>();
-                var data = stats ?? new DashboardDataDto();
+                        data.RevenueByMonth = (await multi.ReadAsync<MonthlyStatDto>()).ToList();
+                        data.TopServices = (await multi.ReadAsync<TopServiceDto>()).ToList();
 
-                data.RevenueByMonth = (await multi.ReadAsync<MonthlyStatDto>()).ToList();
-                data.TopServices = (await multi.ReadAsync<TopServiceDto>()).ToList();
-
-                await _cacheService.SetAsync(cacheKey, data, TimeSpan.FromMinutes(5), group: "DashboardStats", cancellationToken: cancellationToken);
-
-                return data;
-            }
+                        return data;
+                    }
+                },
+                absoluteExpiration: TimeSpan.FromMinutes(5),
+                group: "DashboardStats",
+                slidingExpiration: TimeSpan.FromMinutes(2),
+                cancellationToken: cancellationToken);
         }
     }
 }

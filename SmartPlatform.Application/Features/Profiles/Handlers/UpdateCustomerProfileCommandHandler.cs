@@ -33,8 +33,8 @@ namespace SmartPlatform.Application.Features.Profiles.Handlers
 
             if (result)
             {
-                await _cacheService.RemoveAsync($"ServiceRequests_List_P1_S10_Prall_Cu{profile.UserId}_Schnone_Bynone");
-                await _cacheService.RemoveAsync($"DashboardStats_{profile.UserId}_Admin_False");
+                await _cacheService.RemoveGroupAsync("ServiceRequests", cancellationToken);
+                await _cacheService.RemoveGroupAsync("DashboardStats", cancellationToken);
             }
 
             return result;

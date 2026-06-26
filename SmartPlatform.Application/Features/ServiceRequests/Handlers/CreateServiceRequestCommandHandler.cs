@@ -59,10 +59,9 @@ namespace SmartPlatform.Application.Features.ServiceRequests.Handlers
             await _unitOfWork.Repository<ServiceRequest>().AddAsync(serviceRequest);
             await _unitOfWork.CompleteAsync();
 
+            await _cacheService.RemoveGroupAsync("ServiceRequests", cancellationToken);
+            await _cacheService.RemoveGroupAsync("DashboardStats", cancellationToken);
             await _cacheService.RemoveAsync($"ServiceDetails_{serviceRequest.ServiceId}");
-            await _cacheService.RemoveAsync($"ServiceRequests_List_P1_S10_Prall_Cu{request.ServiceRequestDto.CustomerId}_Schnone_Bynone");
-            await _cacheService.RemoveAsync($"DashboardStats_{request.ServiceRequestDto.CustomerId}_Admin_False");
-            await _cacheService.RemoveAsync("DashboardStats_Admin_Global");
         }
     }
 }

@@ -39,7 +39,7 @@ namespace SmartPlatform.Web
             builder.Services.AddValidatorsFromAssembly(typeof(GetServicesQuery).Assembly);
 
             builder.Services.AddMemoryCache();
-            builder.Services.AddTransient<ICacheService, SmartPlatform.Infrastructure.Services.MemoryCacheService>();
+            builder.Services.AddTransient<ICacheService, Infrastructure.Services.MemoryCacheService>();
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
