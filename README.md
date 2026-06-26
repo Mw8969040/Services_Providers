@@ -1,15 +1,3 @@
-# <p align="center"><img src="docs/images/readme_banner.png" alt="Smart Platform Banner" width="100%"></p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/.NET-8.0-512BD4?logo=.net&logoColor=white&style=flat-square" alt=".NET Version">
-  <img src="https://img.shields.io/badge/Architecture-Clean%20Architecture-blue?style=flat-square" alt="Clean Architecture">
-  <img src="https://img.shields.io/badge/Pattern-CQRS%20%2F%20MediatR-brightgreen?style=flat-square" alt="CQRS & MediatR">
-  <img src="https://img.shields.io/badge/Database-SQL%20Server%20%2B%20Dapper%20%2B%20EF-orange?style=flat-square" alt="Database">
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
-</p>
-
----
-
 ## 🚀 Overview
 
 **Smart Platform** is a enterprise-grade, high-performance service provider booking platform built using **ASP.NET Core 8 MVC**. It establishes a reliable marketplace connecting service providers with clients.
